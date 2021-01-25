@@ -318,14 +318,13 @@ int main(int argc, char **argv)
     //std::cout << "Q = " << Q_weight(chiSq, ndof) << std::endl;
 
     // write result coefficients to screen
-    /*
     std::cout << "\nFitted parameters:" << std::endl;
     for (int coeffIndex = 0; coeffIndex < sectorNumber; coeffIndex++)
     {
         std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
     }
-    */
 
+    /*
     for (int i = 0; i < coeffVector.size(); i++)
     {
         std::cout << coeffVector[i] << " ";
@@ -335,4 +334,5 @@ int main(int argc, char **argv)
         }
         std::cout << std::endl;
     }
+    */
 }
