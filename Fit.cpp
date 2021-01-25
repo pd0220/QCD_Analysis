@@ -15,7 +15,7 @@ std::string const PDG = "../PDG.txt";
 // argv[4] --> number of used susceptibilities (Zu, Zs, etc.)
 // argv[5] --> divisor for jackknife sample number reduction
 // argv[6] --> where to cut sectors --> B = 2 or 3
-int main(int argc, char **argv)
+int main(int, char **argv)
 {
     // prepare for reading given file
     // string for file name (im mu)
@@ -232,40 +232,57 @@ int main(int argc, char **argv)
     //
     // START FIT
     // --> imZB and imZS (correlated)
+    // --> ZBB, ZBS and ZSS at mu = 0
     //
 
     // number of x-values (muB and muS)
     int const N = muB.size();
 
-    // what quantities we are fitting on (imZB and imZS now)
+    // what quantities we are fitting on (imZB and imZS)
     std::vector<std::pair<int, int>> DOrders{{1, 0}, {0, 1}};
+    // what quantities we are fittin at mu = 0 (ZBB, ZBS ans ZSS)
+    std::vector<std::pair<int, int>> DOrdersMuZero{{2, 0}, {1, 1}, {0, 2}};
     // number of quantitites
     int const numOfQs = static_cast<int>(DOrders.size());
+    int const numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
 
     // y data matrix to calculate RHS vector
-    Eigen::MatrixXd yMat(numOfQs, N);
-    yMat.row(0) = imZBVals;
-    yMat.row(1) = imZSVals;
+    Eigen::MatrixXd yMat(numOfQs, N - 1);
+    yMat.row(0) = imZBVals.segment(1, N - 1);
+    yMat.row(1) = imZSVals.segment(1, N - 1);
+
+    // y data matrix to calculate RHS vector at mu = 0
+    Eigen::MatrixXd yMatMuZero(numOfQsMuZero, 1);
+    yMatMuZero(0, 0) = ZBBVals(0);
+    yMatMuZero(1, 0) = ZBSVals(0);
+    yMatMuZero(2, 0) = ZSSVals(0);
 
     // JCK samples with ordered structure (required for covariance matrix estimation)
-    Eigen::MatrixXd JCKSamplesForFit(numOfQs * N, jckNum);
-    for (int i = 0; i < N; i++)
+    Eigen::MatrixXd JCKSamplesForFit(numOfQs * (N - 1), jckNum);
+    for (int i = 0; i < N - 1; i++)
     {
         for (int q = 0; q < numOfQs; q++)
         {
             if (q == 0)
-                JCKSamplesForFit.row(numOfQs * i + q) = imZBJCKs.row(i);
+                JCKSamplesForFit.row(numOfQs * i + q) = imZBJCKs.row(i + 1);
             else if (q == 1)
-                JCKSamplesForFit.row(numOfQs * i + q) = imZSJCKs.row(i);
+                JCKSamplesForFit.row(numOfQs * i + q) = imZSJCKs.row(i + 1);
         }
     }
+    // JCK samples with ordered structure (required for covariance matrix estimation) at mu = 0
+    Eigen::MatrixXd JCKSamplesForFitMuZero(numOfQsMuZero, jckNum);
+    JCKSamplesForFitMuZero.row(0) = ZBBJCKs.row(0);
+    JCKSamplesForFitMuZero.row(1) = ZBSJCKs.row(0);
+    JCKSamplesForFitMuZero.row(2) = ZSSJCKs.row(0);
 
     // inverse covariance matrix blocks
-    std::vector<Eigen::MatrixXd> CInvContainer(N, Eigen::MatrixXd(numOfQs, numOfQs));
-    for (int i = 0; i < N; i++)
+    std::vector<Eigen::MatrixXd> CInvContainer(N - 1, Eigen::MatrixXd(numOfQs, numOfQs));
+    for (int i = 0; i < N - 1; i++)
     {
         CInvContainer[i] = BlockCInverseJCK(JCKSamplesForFit, numOfQs, i, jckNum);
     }
+    // inverse covariance matrix blocks at mu = 0
+    Eigen::MatrixXd CInvMuZero = BlockCInverseJCK(JCKSamplesForFitMuZero, numOfQsMuZero, 0, jckNum);
 
     // what basis functions shall be included in the fit {B, S} ~ sectors
     std::vector<std::pair<int, int>> BSNumbers;
@@ -277,29 +294,36 @@ int main(int argc, char **argv)
     int sectorNumber = static_cast<int>(BSNumbers.size());
 
     // LHS matrix for the linear equation system
-    Eigen::MatrixXd LHS = MatLHS(BSNumbers, DOrders, muB, muS, CInvContainer);
+    Eigen::MatrixXd LHS = MatLHS(BSNumbers, DOrders, DOrdersMuZero, muB, muS, CInvContainer, CInvMuZero);
 
     // RHS vector for the linear equation system
-    Eigen::VectorXd RHS = VecRHS(BSNumbers, DOrders, yMat, muB, muS, CInvContainer);
+    Eigen::VectorXd RHS = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMat, yMatMuZero, muB, muS, CInvContainer, CInvMuZero);
 
     // solving the linear equqation system for fitted coefficients
     Eigen::VectorXd coeffVector = (LHS).fullPivLu().solve(RHS);
 
     // chi squared value
-    double chiSq = ChiSq(BSNumbers, DOrders, yMat, muB, muS, CInvContainer, coeffVector);
+    //double chiSq = ChiSq(BSNumbers, DOrders, yMat, muB, muS, CInvContainer, coeffVector);
     // number of degrees of freedom
-    int ndof = NDoF(CInvContainer, coeffVector);
+    //int ndof = NDoF(CInvContainer, coeffVector);
 
     // error estimation via jackknife method
     std::vector<Eigen::VectorXd> JCK_RHS(jckNum);
     for (int i = 0; i < jckNum; i++)
     {
         // y data matrix for jackknife fits
-        Eigen::MatrixXd yMatJCK(numOfQs, N);
-        yMatJCK.row(0) = imZBJCKs.col(i);
-        yMatJCK.row(1) = imZSJCKs.col(i);
+        Eigen::MatrixXd yMatJCK(numOfQs, N - 1);
+        yMatJCK.row(0) = imZBJCKs.col(i).segment(1, N - 1);
+        yMatJCK.row(1) = imZSJCKs.col(i).segment(1, N - 1);
+
+        // y data matrix for jackknife fits at mu = 0
+        Eigen::MatrixXd yMatMuZero(numOfQsMuZero, 1);
+        yMatMuZero(0, 0) = ZBBJCKs.col(i)(0);
+        yMatMuZero(1, 0) = ZBSJCKs.col(i)(0);
+        yMatMuZero(2, 0) = ZSSJCKs.col(i)(0);
+
         // RHS vectors from jackknife samples
-        JCK_RHS[i] = VecRHS(BSNumbers, DOrders, yMatJCK, muB, muS, CInvContainer);
+        JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatMuZero, muB, muS, CInvContainer, CInvMuZero);
     }
     // fit with jackknife samples
     std::vector<Eigen::VectorXd> JCK_coeffVector(jckNum);

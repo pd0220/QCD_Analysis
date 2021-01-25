@@ -448,7 +448,7 @@ auto BootstrapSamplesCalculation = [](Eigen::VectorXd const &blocks, auto const 
 //
 //
 // FUNCTION FITTING METHODS (2D and/or correlated)
-// (not yet generalized)
+// (not yet generalized entirely)
 //
 //
 
@@ -587,7 +587,13 @@ auto BlockCInverseBootstrap = [](Eigen::MatrixXd const &BSs, int const &numOfQs,
 // ------------------------------------------------------------------------------------------------------------
 
 // general basis function with given ansatz --> ** determines the fit **
-auto BasisFunc = [](int const &B, int const &S, int const &BOrder, int const &SOrder, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, int const &index) {
+auto BasisFunc = [](int const &B,
+                    int const &S,
+                    int const &BOrder,
+                    int const &SOrder,
+                    Eigen::VectorXd const &muB,
+                    Eigen::VectorXd const &muS,
+                    int const &index) {
     // total number of partial derivations
     int FullOrder = BOrder + SOrder;
     // first derivative
@@ -610,7 +616,13 @@ auto BasisFunc = [](int const &B, int const &S, int const &BOrder, int const &SO
 // ------------------------------------------------------------------------------------------------------------
 
 // Fourier basis functions
-auto FourierBasis = [](int const &B, int const &S, int const &BOrder, int const &SOrder, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, int const &index) {
+auto FourierBasis = [](int const &B,
+                       int const &S,
+                       int const &BOrder,
+                       int const &SOrder,
+                       Eigen::VectorXd const &muB,
+                       Eigen::VectorXd const &muS,
+                       int const &index) {
     // total number of partial derivations
     int FullOrder = BOrder + SOrder;
     // first derivative
@@ -633,11 +645,21 @@ auto FourierBasis = [](int const &B, int const &S, int const &BOrder, int const 
 // ------------------------------------------------------------------------------------------------------------
 
 // LHS matrix element for given fit
-auto MatElement = [](int const &i, int const &j, std::vector<std::pair<int, int>> const &DOrders, std::vector<std::pair<int, int>> const &BSNumbers, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, std::vector<Eigen::MatrixXd> const &CInvContainer) {
+auto MatElement = [](int const &i,
+                     int const &j,
+                     std::vector<std::pair<int, int>> const &DOrders,
+                     std::vector<std::pair<int, int>> const &DOrdersMuZero,
+                     std::vector<std::pair<int, int>> const &BSNumbers,
+                     Eigen::VectorXd const &muB,
+                     Eigen::VectorXd const &muS,
+                     std::vector<Eigen::MatrixXd> const &CInvContainer,
+                     Eigen::MatrixXd const &CInvMuZero) {
     // number of quantites to fit
     int numOfQs = static_cast<int>(DOrders.size());
+    int numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
     // vectors to store base function data
     Eigen::VectorXd baseFunc_i(numOfQs), baseFunc_j(numOfQs);
+    Eigen::VectorXd baseFuncMuZero_i(numOfQsMuZero), baseFuncMuZero_j(numOfQsMuZero);
 
     // helper variables
     int B_i = BSNumbers[i].first, S_i = BSNumbers[i].second;
@@ -645,7 +667,20 @@ auto MatElement = [](int const &i, int const &j, std::vector<std::pair<int, int>
 
     // calculate matrix element
     double sum = 0.;
-    for (int m = 0; m < muB.size(); m++)
+    // vector element for mu = 0
+    for (int qIndex = 0; qIndex < numOfQsMuZero; qIndex++)
+    {
+        // derivation orders
+        int BOrder = DOrdersMuZero[qIndex].first;
+        int SOrder = DOrdersMuZero[qIndex].second;
+        // fill basis function vectors
+        baseFuncMuZero_i(qIndex) = BasisFunc(B_i, S_i, BOrder, SOrder, muB, muS, 0);
+        baseFuncMuZero_j(qIndex) = BasisFunc(B_j, S_j, BOrder, SOrder, muB, muS, 0);
+    }
+
+    sum += baseFuncMuZero_i.transpose() * CInvMuZero * baseFuncMuZero_j;
+
+    for (int m = 1; m < muB.size(); m++)
     {
         // create vector elements
         for (int qIndex = 0; qIndex < numOfQs; qIndex++)
@@ -659,7 +694,7 @@ auto MatElement = [](int const &i, int const &j, std::vector<std::pair<int, int>
         }
 
         // add to sum the proper covariance matrix contribution
-        sum += baseFunc_i.transpose() * CInvContainer[m] * baseFunc_j;
+        sum += baseFunc_i.transpose() * CInvContainer[m - 1] * baseFunc_j;
     }
 
     // return calculated matrix element
@@ -669,7 +704,13 @@ auto MatElement = [](int const &i, int const &j, std::vector<std::pair<int, int>
 // ------------------------------------------------------------------------------------------------------------
 
 // LHS matrix for the linear equation system
-auto MatLHS = [](std::vector<std::pair<int, int>> const &BSNumbers, std::vector<std::pair<int, int>> const &DOrders, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, std::vector<Eigen::MatrixXd> const &CInvContainer) {
+auto MatLHS = [](std::vector<std::pair<int, int>> const &BSNumbers,
+                 std::vector<std::pair<int, int>> const &DOrders,
+                 std::vector<std::pair<int, int>> const &DOrdersMuZero,
+                 Eigen::VectorXd const &muB,
+                 Eigen::VectorXd const &muS,
+                 std::vector<Eigen::MatrixXd> const &CInvContainer,
+                 Eigen::MatrixXd const &CInvMuZero) {
     // size of matrix
     int size = static_cast<int>(BSNumbers.size());
 
@@ -681,7 +722,7 @@ auto MatLHS = [](std::vector<std::pair<int, int>> const &BSNumbers, std::vector<
     {
         for (int j = 0; j < size; j++)
         {
-            LHS(i, j) = MatElement(i, j, DOrders, BSNumbers, muB, muS, CInvContainer);
+            LHS(i, j) = MatElement(i, j, DOrders, DOrdersMuZero, BSNumbers, muB, muS, CInvContainer, CInvMuZero);
         }
     }
 
@@ -692,20 +733,46 @@ auto MatLHS = [](std::vector<std::pair<int, int>> const &BSNumbers, std::vector<
 // ------------------------------------------------------------------------------------------------------------
 
 // RHS vector element for given fit
-auto VecElement = [](int const &i, std::vector<std::pair<int, int>> const &BSNumbers, std::vector<std::pair<int, int>> const &DOrders, Eigen::MatrixXd const &yMat, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, std::vector<Eigen::MatrixXd> const &CInvContainer) {
+auto VecElement = [](int const &i,
+                     std::vector<std::pair<int, int>> const &BSNumbers,
+                     std::vector<std::pair<int, int>> const &DOrders,
+                     std::vector<std::pair<int, int>> const &DOrdersMuZero,
+                     Eigen::MatrixXd const &yMat,
+                     Eigen::MatrixXd const &yMatMuZero,
+                     Eigen::VectorXd const &muB,
+                     Eigen::VectorXd const &muS,
+                     std::vector<Eigen::MatrixXd> const &CInvContainer,
+                     Eigen::MatrixXd const &CInvMuZero) {
     // number of quantites to fit
     int numOfQs = static_cast<int>(DOrders.size());
+    int numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
     // vectors to store base function data
     Eigen::VectorXd baseFunc_i(numOfQs);
+    Eigen::VectorXd baseFuncMuZero_i(numOfQsMuZero);
+
     // vector to store given y values
     Eigen::VectorXd yVec(numOfQs);
+    Eigen::VectorXd yVecMuZero(numOfQsMuZero);
 
     // helper variables
     int B_i = BSNumbers[i].first, S_i = BSNumbers[i].second;
 
     // calculate vector element
     double sum = 0.;
-    for (int m = 0; m < muB.size(); m++)
+    for (int qIndex = 0; qIndex < numOfQsMuZero; qIndex++)
+    {
+        // derivation orders
+        int BOrder = DOrdersMuZero[qIndex].first;
+        int SOrder = DOrdersMuZero[qIndex].second;
+        // fill basis function vectors
+        baseFuncMuZero_i(qIndex) = BasisFunc(B_i, S_i, BOrder, SOrder, muB, muS, 0);
+        // fill y vectors
+        yVecMuZero(qIndex) = yMatMuZero.row(qIndex)(0);
+    }
+
+    sum += yVecMuZero.transpose() * CInvMuZero * baseFuncMuZero_i;
+
+    for (int m = 1; m < muB.size(); m++)
     {
         // create vector elements
         for (int qIndex = 0; qIndex < numOfQs; qIndex++)
@@ -716,11 +783,11 @@ auto VecElement = [](int const &i, std::vector<std::pair<int, int>> const &BSNum
             // fill basis function vectors
             baseFunc_i(qIndex) = BasisFunc(B_i, S_i, BOrder, SOrder, muB, muS, m);
             // fill y vectors
-            yVec(qIndex) = yMat.row(qIndex)(m);
+            yVec(qIndex) = yMat.row(qIndex)(m - 1);
         }
 
         // add to sum the covariance matrix contribution
-        sum += yVec.transpose() * CInvContainer[m] * baseFunc_i;
+        sum += yVec.transpose() * CInvContainer[m - 1] * baseFunc_i;
     }
 
     // return calculated matrix element
@@ -730,7 +797,15 @@ auto VecElement = [](int const &i, std::vector<std::pair<int, int>> const &BSNum
 // ------------------------------------------------------------------------------------------------------------
 
 // RHS vector for the linear equation system
-auto VecRHS = [](std::vector<std::pair<int, int>> const &BSNumbers, std::vector<std::pair<int, int>> const &DOrders, Eigen::MatrixXd const &yMat, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, std::vector<Eigen::MatrixXd> const &CInvContainer) {
+auto VecRHS = [](std::vector<std::pair<int, int>> const &BSNumbers,
+                 std::vector<std::pair<int, int>> const &DOrders,
+                 std::vector<std::pair<int, int>> const &DOrdersMuZero,
+                 Eigen::MatrixXd const &yMat,
+                 Eigen::MatrixXd const &yMatMuZero,
+                 Eigen::VectorXd const &muB,
+                 Eigen::VectorXd const &muS,
+                 std::vector<Eigen::MatrixXd> const &CInvContainer,
+                 Eigen::MatrixXd const &CInvMuZero) {
     // size of vector
     int size = static_cast<int>(BSNumbers.size());
 
@@ -740,7 +815,7 @@ auto VecRHS = [](std::vector<std::pair<int, int>> const &BSNumbers, std::vector<
     // fill vector
     for (int i = 0; i < size; i++)
     {
-        RHS(i) = VecElement(i, BSNumbers, DOrders, yMat, muB, muS, CInvContainer);
+        RHS(i) = VecElement(i, BSNumbers, DOrders, DOrdersMuZero, yMat, yMatMuZero, muB, muS, CInvContainer, CInvMuZero);
     }
 
     // return RHS vector
@@ -913,7 +988,12 @@ auto EnergyDensityHRG = [](std::vector<Hadron> const &hadronList, double const &
 // ------------------------------------------------------------------------------------------------------------
 
 // susceptibility in HRG
-auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList, int const &orderB, int const &orderS, int const &orderQ, double const &temperature, int const &kCut) {
+auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList,
+                            int const &orderB,
+                            int const &orderS,
+                            int const &orderQ,
+                            double const &temperature,
+                            int const &kCut) {
     // number of hadrons to consider
     int numOfHadrons = static_cast<int>(hadronList.size());
     // calculate given susceptibility
@@ -934,7 +1014,13 @@ auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList, int const &or
 //
 
 // chiSquared fit quality
-auto ChiSq = [](std::vector<std::pair<int, int>> const &BSNumbers, std::vector<std::pair<int, int>> const &DOrders, Eigen::MatrixXd const &yMat, Eigen::VectorXd const &muB, Eigen::VectorXd const &muS, std::vector<Eigen::MatrixXd> const &CInvContainer, Eigen::VectorXd const &coeffVector) {
+auto ChiSq = [](std::vector<std::pair<int, int>> const &BSNumbers,
+                std::vector<std::pair<int, int>> const &DOrders,
+                Eigen::MatrixXd const &yMat,
+                Eigen::VectorXd const &muB,
+                Eigen::VectorXd const &muS,
+                std::vector<Eigen::MatrixXd> const &CInvContainer,
+                Eigen::VectorXd const &coeffVector) {
     // number of quantites fitted on
     int numOfQs = static_cast<int>(DOrders.size());
     // number of fitted parameters
