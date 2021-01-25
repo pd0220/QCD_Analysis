@@ -1,3 +1,5 @@
 .gitignore
 /build
 /final_data
+/.vscode
+/FitResult
