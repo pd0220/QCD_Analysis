@@ -317,13 +317,13 @@ int main(int, char **argv)
         yMatJCK.row(1) = imZSJCKs.col(i).segment(1, N - 1);
 
         // y data matrix for jackknife fits at mu = 0
-        Eigen::MatrixXd yMatMuZero(numOfQsMuZero, 1);
-        yMatMuZero(0, 0) = ZBBJCKs.col(i)(0);
-        yMatMuZero(1, 0) = ZBSJCKs.col(i)(0);
-        yMatMuZero(2, 0) = ZSSJCKs.col(i)(0);
+        Eigen::MatrixXd yMatJCKMuZero(numOfQsMuZero, 1);
+        yMatJCKMuZero(0, 0) = ZBBJCKs.col(i)(0);
+        yMatJCKMuZero(1, 0) = ZBSJCKs.col(i)(0);
+        yMatJCKMuZero(2, 0) = ZSSJCKs.col(i)(0);
 
         // RHS vectors from jackknife samples
-        JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatMuZero, muB, muS, CInvContainer, CInvMuZero);
+        JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatJCKMuZero, muB, muS, CInvContainer, CInvMuZero);
     }
     // fit with jackknife samples
     std::vector<Eigen::VectorXd> JCK_coeffVector(jckNum);
@@ -342,13 +342,11 @@ int main(int, char **argv)
     //std::cout << "Q = " << Q_weight(chiSq, ndof) << std::endl;
 
     // write result coefficients to screen
-    /*
     std::cout << "\nFitted parameters:" << std::endl;
     for (int coeffIndex = 0; coeffIndex < sectorNumber; coeffIndex++)
     {
         std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
     }
-    */
 
     for (int i = 0; i < coeffVector.size(); i++)
     {

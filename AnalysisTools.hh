@@ -427,24 +427,6 @@ auto JCKFitErrorEstimation = [](Eigen::VectorXd const &coeffVector, std::vector<
     return errorVec;
 };
 
-// ------------------------------------------------------------------------------------------------------------
-
-// calculate bootstrap samples from block means
-auto BootstrapSamplesCalculation = [](Eigen::VectorXd const &blocks, auto const &randFunc) {
-    // number of blocks
-    int numOfBlocks = blocks.size();
-
-    // resampling randomly ~ bootsrapping
-    Eigen::VectorXd resampledBlocks(numOfBlocks);
-    for (int iBlock = 0; iBlock < numOfBlocks; iBlock++)
-    {
-        resampledBlocks(iBlock) = blocks(randFunc(numOfBlocks));
-    }
-
-    // return bootstrap sample
-    return resampledBlocks.mean();
-};
-
 //
 //
 // FUNCTION FITTING METHODS (2D and/or correlated)
@@ -466,24 +448,6 @@ auto CorrCoeffJCK = [](Eigen::VectorXd const &vec1, Eigen::VectorXd const &vec2,
 
     // return normed correlation coefficient
     return corr * (NJck - 1) / NJck;
-};
-
-// ------------------------------------------------------------------------------------------------------------
-
-// calculate correlation coefficients of two datasets with given means (better this way) (bootstrap)
-auto CorrCoeffBootstrap = [](Eigen::VectorXd const &vec1, Eigen::VectorXd const &vec2, double const &mean1, double const &mean2) {
-    // number of bootstrap samples
-    double NBS = (double)vec1.size();
-
-    // calculate correlation (not normed)
-    double corr = 0;
-    for (int i = 0; i < NBS; i++)
-    {
-        corr += (vec1(i) - mean1) * (vec2(i) - mean2);
-    }
-
-    // return normed correlation coefficient
-    return corr / NBS;
 };
 
 // ------------------------------------------------------------------------------------------------------------
@@ -537,55 +501,6 @@ auto BlockCInverseJCK = [](Eigen::MatrixXd const &JCKs, int const &numOfQs, int 
 
 // ------------------------------------------------------------------------------------------------------------
 
-// block from the blockdiagonal covariance matrix (bootstrap)
-auto BlockCInverseBootstrap = [](Eigen::MatrixXd const &BSs, int const &numOfQs, int const &qIndex, int const &bsNum) {
-    // choose appropriate bootstrap samples from given JCK matrix
-    Eigen::MatrixXd BootstrapsQ(numOfQs, bsNum);
-    for (int i = 0; i < numOfQs; i++)
-    {
-        BootstrapsQ.row(i) = BSs.row(qIndex * numOfQs + i);
-    }
-
-    // means to calculate correlations
-    Eigen::VectorXd means = Eigen::VectorXd::Zero(numOfQs);
-    for (int i = 0; i < numOfQs; i++)
-    {
-        means(i) = BootstrapsQ.row(i).mean();
-    }
-
-    // covariance matrix block
-    Eigen::MatrixXd C = Eigen::MatrixXd::Zero(numOfQs, numOfQs);
-
-    for (int i = 0; i < numOfQs; i++)
-    {
-        for (int j = i; j < numOfQs; j++)
-        {
-            // check if mean and jackknife samples are zero --> not measured and set to zero artificially
-            if (means(i) == 0 && means(j) == 0 && BootstrapsQ.row(i).isZero() && BootstrapsQ.row(j).isZero())
-            {
-                // set to identity matrix
-                if (i == j)
-                    C(j, i) = 1.;
-                else
-                    C(j, i) = 0.;
-            }
-            // triangular part
-            else
-            {
-                C(j, i) = CorrCoeffBootstrap(BootstrapsQ.row(i), BootstrapsQ.row(j), means(i), means(j));
-                // using symmetries
-                if (i != j)
-                    C(i, j) = C(j, i);
-            }
-        }
-    }
-
-    // return inverse covariance matrix block
-    return (Eigen::MatrixXd)C.inverse();
-};
-
-// ------------------------------------------------------------------------------------------------------------
-
 // general basis function with given ansatz --> ** determines the fit **
 auto BasisFunc = [](int const &B,
                     int const &S,
@@ -605,35 +520,6 @@ auto BasisFunc = [](int const &B,
     else if (FullOrder % 4 == 2)
     {
         return std::pow(B, BOrder) * std::pow(-S, SOrder) * std::cos(B * muB(index) - S * muS(index));
-    }
-    else
-    {
-        std::cout << "ERROR\nInvalid derivative order." << std::endl;
-        std::exit(-1);
-    }
-};
-
-// ------------------------------------------------------------------------------------------------------------
-
-// Fourier basis functions
-auto FourierBasis = [](int const &B,
-                       int const &S,
-                       int const &BOrder,
-                       int const &SOrder,
-                       Eigen::VectorXd const &muB,
-                       Eigen::VectorXd const &muS,
-                       int const &index) {
-    // total number of partial derivations
-    int FullOrder = BOrder + SOrder;
-    // first derivative
-    if (FullOrder % 4 == 1)
-    {
-        return std::sin(B * muB(index) - S * muS(index));
-    }
-    // second derivative
-    else if (FullOrder % 4 == 2)
-    {
-        return std::cos(B * muB(index) - S * muS(index));
     }
     else
     {
