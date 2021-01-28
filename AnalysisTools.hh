@@ -293,6 +293,41 @@ auto ZQSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
     return (Z[5] - Z[4]) / 3;
 };
 
+// ------------------------------------------------------------------------------------------------------------
+
+// ZBBBB
+auto ZBBBBCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+    return (2. * Z[6] + Z[14] + 8. * Z[7] + 8. * Z[8] + 8. * Z[13] + 6. * Z[9] + 12. * Z[11] + 24. * Z[10] + 12. * Z[12]) / 81.;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
+// ZSSSS
+auto ZSSSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+    return Z[14];
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
+// ZBSSS
+auto ZBSSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+    return -(2. * Z[13] + Z[14]) / 3.;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
+// ZBBSS
+auto ZBBSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+    return (2. * Z[11] + 2. * Z[12] + 4. * Z[13] + Z[14]) / 9.;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
+// ZBBBS
+auto ZBBBSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+    return -(2. * Z[8] + Z[14] + 6. * Z[10] + 6. * Z[11] + 6. * Z[13] + 6. * Z[12]) / 27.;
+};
+
 //
 //
 // STATISTICAL FUNCTIONS (ERROR, VARIANCE, JACKKNIFE, BOOTSTRAP, ETC...)
@@ -512,12 +547,12 @@ auto BasisFunc = [](int const &B,
     // total number of partial derivations
     int FullOrder = BOrder + SOrder;
     // first derivative
-    if (FullOrder % 4 == 1)
+    if (FullOrder % 2 == 1)
     {
         return std::pow(B, BOrder) * std::pow(-S, SOrder) * std::sin(B * muB(index) - S * muS(index));
     }
     // second derivative
-    else if (FullOrder % 4 == 2)
+    else if (FullOrder % 2 == 0)
     {
         return std::pow(B, BOrder) * std::pow(-S, SOrder) * std::cos(B * muB(index) - S * muS(index));
     }

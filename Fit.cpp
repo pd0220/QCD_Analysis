@@ -113,6 +113,26 @@ int main(int, char **argv)
     Eigen::VectorXd ZIIVals(rows);
     Eigen::VectorXd ZIIErrs(rows);
     Eigen::MatrixXd ZIIJCKs(rows, jckNum);
+    // vectors to store ZBBBB values and their estimated errors (results) + JCK
+    Eigen::VectorXd ZBBBBVals(rows);
+    Eigen::VectorXd ZBBBBErrs(rows);
+    Eigen::MatrixXd ZBBBBJCKs(rows, jckNum);
+    // vectors to store ZSSSS values and their estimated errors (results) + JCK
+    Eigen::VectorXd ZSSSSVals(rows);
+    Eigen::VectorXd ZSSSSErrs(rows);
+    Eigen::MatrixXd ZSSSSJCKs(rows, jckNum);
+    // vectors to store ZBSSS values and their estimated errors (results) + JCK
+    Eigen::VectorXd ZBSSSVals(rows);
+    Eigen::VectorXd ZBSSSErrs(rows);
+    Eigen::MatrixXd ZBSSSJCKs(rows, jckNum);
+    // vectors to store ZBBSS values and their estimated errors (results) + JCK
+    Eigen::VectorXd ZBBSSVals(rows);
+    Eigen::VectorXd ZBBSSErrs(rows);
+    Eigen::MatrixXd ZBBSSJCKs(rows, jckNum);
+    // vectors to store ZBBBS values and their estimated errors (results) + JCK
+    Eigen::VectorXd ZBBBSVals(rows);
+    Eigen::VectorXd ZBBBSErrs(rows);
+    Eigen::MatrixXd ZBBBSJCKs(rows, jckNum);
     // container for "flavour vectors"
     std::vector<Eigen::VectorXd> ZContainer(ZNum);
     // loop for every row
@@ -161,6 +181,11 @@ int main(int, char **argv)
         Eigen::VectorXd ZBS = ZBSCalc(ZContainer);
         Eigen::VectorXd ZQS = ZQSCalc(ZContainer);
         Eigen::VectorXd ZII = ZIICalc(ZContainer);
+        Eigen::VectorXd ZBBBB = ZBBBBCalc(ZContainer);
+        Eigen::VectorXd ZSSSS = ZSSSSCalc(ZContainer);
+        Eigen::VectorXd ZBSSS = ZBSSSCalc(ZContainer);
+        Eigen::VectorXd ZBBSS = ZBBSSCalc(ZContainer);
+        Eigen::VectorXd ZBBBS = ZBBBSCalc(ZContainer);
 
         // save results
         // imZB
@@ -183,6 +208,16 @@ int main(int, char **argv)
         ZQSVals(i) = ZQS(0);
         // ZII
         ZIIVals(i) = ZII(0);
+        // ZBBBB
+        ZBBBBVals(i) = ZBBBB(0);
+        // ZSSSS
+        ZSSSSVals(i) = ZSSSS(0);
+        // ZBSSS
+        ZBSSSVals(i) = ZBSSS(0);
+        // ZBBSS
+        ZBBSSVals(i) = ZBBSS(0);
+        // ZBBBS
+        ZBBBSVals(i) = ZBBBS(0);
 
         // save jackknife samples
         // imZB
@@ -205,6 +240,16 @@ int main(int, char **argv)
         ZQSJCKs.row(i) = ZQS.segment(2, jckNum);
         // ZII
         ZIIJCKs.row(i) = ZII.segment(2, jckNum);
+        // ZBBBB
+        ZBBBBJCKs.row(i) = ZBBBB.segment(2, jckNum);
+        // ZSSSS
+        ZSSSSJCKs.row(i) = ZSSSS.segment(2, jckNum);
+        // ZBSSS
+        ZBSSSJCKs.row(i) = ZBSSS.segment(2, jckNum);
+        // ZBBSS
+        ZBBSSJCKs.row(i) = ZBBSS.segment(2, jckNum);
+        // ZBBBS
+        ZBBBSJCKs.row(i) = ZBBBS.segment(2, jckNum);
 
         // save errors
         // imZB
@@ -227,12 +272,22 @@ int main(int, char **argv)
         ZQSErrs(i) = ZError(ZQS);
         // ZII
         ZIIErrs(i) = ZError(ZII);
+        // ZBBBB
+        ZBBBBErrs(i) = ZError(ZBBBB);
+        // ZSSSS
+        ZSSSSErrs(i) = ZError(ZSSSS);
+        // ZBSSS
+        ZBSSSErrs(i) = ZError(ZBSSS);
+        // ZBBSS
+        ZBBSSErrs(i) = ZError(ZBBSS);
+        // ZBBBS
+        ZBBBSErrs(i) = ZError(ZBBBS);
     }
 
     //
     // START FIT
     // --> imZB and imZS (correlated)
-    // --> ZBB, ZBS and ZSS at mu = 0
+    // --> ZBB, ZBS, ZSS, ZBBBB, ZSSSS, ZBSSS, ZBBSS and ZBBBS at mu = 0
     //
 
     // number of x-values (muB and muS)
@@ -240,8 +295,8 @@ int main(int, char **argv)
 
     // what quantities we are fitting on (imZB and imZS)
     std::vector<std::pair<int, int>> DOrders{{1, 0}, {0, 1}};
-    // what quantities we are fittin at mu = 0 (ZBB, ZBS ans ZSS)
-    std::vector<std::pair<int, int>> DOrdersMuZero{{2, 0}, {1, 1}, {0, 2}};
+    // what quantities we are fittin at mu = 0 (ZBB, ZBS, ZSS, ZBBBB, ZSSSS, ZBSSS, ZBBSS and ZBBBS)
+    std::vector<std::pair<int, int>> DOrdersMuZero{{2, 0}, {1, 1}, {0, 2}, {4, 0}, {0, 4}, {1, 3}, {2, 2}, {3, 2}};
     // number of quantitites
     int const numOfQs = static_cast<int>(DOrders.size());
     int const numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
@@ -256,6 +311,11 @@ int main(int, char **argv)
     yMatMuZero(0, 0) = ZBBVals(0);
     yMatMuZero(1, 0) = ZBSVals(0);
     yMatMuZero(2, 0) = ZSSVals(0);
+    yMatMuZero(3, 0) = ZBBBBVals(0);
+    yMatMuZero(4, 0) = ZSSSSVals(0);
+    yMatMuZero(5, 0) = ZBSSSVals(0);
+    yMatMuZero(6, 0) = ZBBSSVals(0);
+    yMatMuZero(7, 0) = ZBBBSVals(0);
 
     // JCK samples with ordered structure (required for covariance matrix estimation)
     Eigen::MatrixXd JCKSamplesForFit(numOfQs * (N - 1), jckNum);
@@ -274,6 +334,11 @@ int main(int, char **argv)
     JCKSamplesForFitMuZero.row(0) = ZBBJCKs.row(0);
     JCKSamplesForFitMuZero.row(1) = ZBSJCKs.row(0);
     JCKSamplesForFitMuZero.row(2) = ZSSJCKs.row(0);
+    JCKSamplesForFitMuZero.row(3) = ZBBBBJCKs.row(0);
+    JCKSamplesForFitMuZero.row(4) = ZSSSSJCKs.row(0);
+    JCKSamplesForFitMuZero.row(5) = ZBSSSJCKs.row(0);
+    JCKSamplesForFitMuZero.row(6) = ZBBSSJCKs.row(0);
+    JCKSamplesForFitMuZero.row(7) = ZBBBSJCKs.row(0);
 
     // inverse covariance matrix blocks
     std::vector<Eigen::MatrixXd> CInvContainer(N - 1, Eigen::MatrixXd(numOfQs, numOfQs));
@@ -321,6 +386,11 @@ int main(int, char **argv)
         yMatJCKMuZero(0, 0) = ZBBJCKs.col(i)(0);
         yMatJCKMuZero(1, 0) = ZBSJCKs.col(i)(0);
         yMatJCKMuZero(2, 0) = ZSSJCKs.col(i)(0);
+        yMatJCKMuZero(3, 0) = ZBBBBJCKs.col(i)(0);
+        yMatJCKMuZero(4, 0) = ZSSSSJCKs.col(i)(0);
+        yMatJCKMuZero(5, 0) = ZBSSSJCKs.col(i)(0);
+        yMatJCKMuZero(6, 0) = ZBBSSJCKs.col(i)(0);
+        yMatJCKMuZero(7, 0) = ZBBBSJCKs.col(i)(0);
 
         // RHS vectors from jackknife samples
         JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatJCKMuZero, muB, muS, CInvContainer, CInvMuZero);
@@ -348,6 +418,8 @@ int main(int, char **argv)
         std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
     }
 
+
+    /*
     for (int i = 0; i < coeffVector.size(); i++)
     {
         std::cout << coeffVector[i] << " ";
@@ -357,4 +429,5 @@ int main(int, char **argv)
         }
         std::cout << std::endl;
     }
+    */
 }
