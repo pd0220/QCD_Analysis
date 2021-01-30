@@ -296,7 +296,7 @@ int main(int, char **argv)
     // what quantities we are fitting on (imZB and imZS)
     std::vector<std::pair<int, int>> DOrders{{1, 0}, {0, 1}};
     // what quantities we are fittin at mu = 0 (ZBB, ZBS, ZSS, ZBBBB, ZSSSS, ZBSSS, ZBBSS and ZBBBS)
-    std::vector<std::pair<int, int>> DOrdersMuZero{{2, 0}, {1, 1}, {0, 2}, {4, 0}, {0, 4}, {1, 3}, {2, 2}, {3, 2}};
+    std::vector<std::pair<int, int>> DOrdersMuZero{{2, 0}, {1, 1}, {0, 2}, {4, 0}, {0, 4}, {1, 3}, {2, 2}, {3, 1}};
     // number of quantitites
     int const numOfQs = static_cast<int>(DOrders.size());
     int const numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
@@ -412,14 +412,14 @@ int main(int, char **argv)
     //std::cout << "Q = " << Q_weight(chiSq, ndof) << std::endl;
 
     // write result coefficients to screen
+    /*
     std::cout << "\nFitted parameters:" << std::endl;
     for (int coeffIndex = 0; coeffIndex < sectorNumber; coeffIndex++)
     {
         std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
     }
-
-
-    /*
+    */
+    
     for (int i = 0; i < coeffVector.size(); i++)
     {
         std::cout << coeffVector[i] << " ";
@@ -429,5 +429,4 @@ int main(int, char **argv)
         }
         std::cout << std::endl;
     }
-    */
 }
