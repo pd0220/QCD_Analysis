@@ -930,87 +930,51 @@ auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList,
 
 //
 //
-// GOODNESS OF FIT TESTS
+// EXTRAPOLATION TO REAL CHEMICAL POTENTIAL VALUES
 //
 //
 
-// chiSquared fit quality
-auto ChiSq = [](std::vector<std::pair<int, int>> const &BSNumbers,
-                std::vector<std::pair<int, int>> const &DOrders,
-                Eigen::MatrixXd const &yMat,
-                Eigen::VectorXd const &muB,
-                Eigen::VectorXd const &muS,
-                std::vector<Eigen::MatrixXd> const &CInvContainer,
-                Eigen::VectorXd const &coeffVector) {
-    // number of quantites fitted on
-    int numOfQs = static_cast<int>(DOrders.size());
-    // number of fitted parameters
-    int nParams = coeffVector.size();
-    // sum over blocks
-    double sum = 0.;
-    for (int i = 0; i < muB.size(); i++)
+// basis functions for susceptibilities (real chemical potential)
+auto BasisFuncReal = [](int const &B, int const &S, int const &BOrder, int const &SOrder, double const &muB, double const &muS) {
+    // total number of partial derivations
+    int FullOrder = BOrder + SOrder;
+    // prefactor
+    double preFactor = std::pow(B, BOrder) * std::pow(-S, SOrder);
+    // odd derivative
+    if (FullOrder % 4 == 1 || FullOrder % 4 == 3)
     {
-        // delta vector for given block ~ size is equal to number of measured quantities
-        Eigen::VectorXd deltaVec(numOfQs);
-        // filling delta and y data vectors
-        for (int j = 0; j < numOfQs; j++)
-        {
-            // calculate fitted function for data points
-            double deltaSum = 0.;
-            for (int k = 0; k < nParams; k++)
-            {
-                // helper variables
-                int B_k = BSNumbers[k].first, S_k = BSNumbers[k].second;
-                // choose y data
-                deltaSum += coeffVector(k) * BasisFunc(B_k, S_k, DOrders[j].first, DOrders[j].second, muB, muS, i);
-            }
-
-            // fill delta vector
-            deltaVec(j) = yMat(j, i) - deltaSum;
-        }
-
-        // add contribution to chiSquared (matrix multiplication block by block)
-        sum += deltaVec.transpose() * CInvContainer[i] * deltaVec;
+        return preFactor * std::sinh(B * muB - S * muS);
     }
-
-    // return chiSquared
-    return sum;
-};
-
-// ------------------------------------------------------------------------------------------------------------
-
-// number of degrees of freedom
-auto NDoF = [](std::vector<Eigen::MatrixXd> const &CInvContainer, Eigen::VectorXd const &coeffVector) {
-    // determine number of datapoints
-    int dataSize = 0;
-    // number of quantitites in the fit
-    int numOfQs = CInvContainer[0].rows();
-    for (int iContainer = 0; iContainer < static_cast<int>(CInvContainer.size()); iContainer++)
+    // even derivative
+    else if (FullOrder % 4 == 2 || FullOrder % 4 == 0)
     {
-        for (int q = 0; q < numOfQs; q++)
-        {
-            // must be exactly 1 (possible mistakes in the future)
-            if (CInvContainer[iContainer](q, q) != 1)
-            {
-                dataSize += 1;
-            }
-        }
+        return preFactor * std::cosh(B * muB - S * muS);
     }
-
-    // return ndof
-    return dataSize - coeffVector.size();
+    else
+    {
+        std::cout << "ERROR\nInvalid derivative order." << std::endl;
+        std::exit(-1);
+    }
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
-// AIC weight
-auto AIC_weight = [](double const &chiSq, int const &ndof) {
-    return std::exp(-0.5 * (chiSq - 2.0 * ((double)ndof)));
-};
-
-// ------------------------------------------------------------------------------------------------------------
-
-// Q weight
-auto Q_weight = [](double const &chiSq, int const &ndof) {
-    return gsl_cdf_chisq_Q(chiSq, (double)ndof);
+// ZS function (real chemical potential)
+auto ZFuncReal = [](double const &muB, double const &muS, int const &BOrder, int const &SOrder, std::vector<std::pair<int, int>> const &SectorNumbers, Eigen::VectorXd const &SectorCoeffs) {
+    // number of analysed sectors
+    int N = static_cast<int>(SectorNumbers.size());
+    // container for results
+    double res = 0.;
+    // accumulating results
+    for (int i = 0; i < N; i++)
+    {
+        // baryon number
+        int B = SectorNumbers[i].first;
+        // strangeness
+        int S = SectorNumbers[i].second;
+        // update result
+        res += SectorCoeffs[i] * BasisFuncReal(B, S, BOrder, SOrder, muB, muS);
+    }
+    // return result
+    return res;
 };

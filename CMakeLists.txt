@@ -23,6 +23,7 @@ endif (MSVC)
 
 # 2D function fit for two correlated sets
 add_executable(Fit Fit.cpp)
+add_executable(Extrapolate Extrapolate.cpp)
 
 set_target_properties(Fit PROPERTIES CXX_STANDARD 17
                                                  CXX_STANDARD_REQUIRED ON
