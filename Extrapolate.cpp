@@ -1,14 +1,7 @@
 // extrapolation to real chemical potentials for lattice QCD simulations
 // using previously determined sector coefficients
 
-// used headers and libraries
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <math.h>
-#include <Eigen/Dense>
+// including used header
 #include "AnalysisTools.hh"
 
 // ---------------------------------------------------------------------------------------

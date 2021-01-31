@@ -1,3 +1,5 @@
+// fitting sector coefficients using lattice QCD simulation results
+
 // including used header
 #include "AnalysisTools.hh"
 
@@ -419,7 +421,7 @@ int main(int, char **argv)
         std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
     }
     */
-    
+
     for (int i = 0; i < coeffVector.size(); i++)
     {
         std::cout << coeffVector[i] << " ";
