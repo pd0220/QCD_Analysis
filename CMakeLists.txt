@@ -24,7 +24,8 @@ endif (MSVC)
 # 2D function fit for two correlated sets
 add_executable(Fit Fit.cpp)
 add_executable(Extrapolate Extrapolate.cpp)
-add_executable(ContinuumLimes ContinuumLimes.cpp)
+add_executable(ContinuumLimes1D ContinuumLimes1D.cpp)
+add_executable(ContinuumLimes2D ContinuumLimes2D.cpp)
 
 set_target_properties(Fit PROPERTIES CXX_STANDARD 17
                                                  CXX_STANDARD_REQUIRED ON
