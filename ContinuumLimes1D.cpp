@@ -39,6 +39,8 @@ int main(int argc, char **argv)
         std::cout << "ERROR\nSector cut parameter is not appropriate: instead of " << baryonCut << " it should be 2 or 3" << std::endl;
         std::exit(-2);
     }
+    
+    // number of jackknife samples
     int const jckNum = std::atoi(argv[3]);
 
     // number of coefficients
@@ -96,14 +98,14 @@ int main(int argc, char **argv)
     std::vector<Eigen::VectorXd> basisFunctions{basisConstant, basisLinear};
 
     // LHS matrices
-    std::vector<Eigen::MatrixXd> LHSMatConatiner(coeffNum);
+    std::vector<Eigen::MatrixXd> LHSMatContainer(coeffNum);
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
-        LHSMatConatiner[iCoeff] = Eigen::MatrixXd::Zero(2, 2);
+        LHSMatContainer[iCoeff] = Eigen::MatrixXd::Zero(2, 2);
         for (int i = 0; i < 2; i++)
         {
             for (int j = 0; j < 2; j++)
-                LHSMatConatiner[iCoeff](i, j) = basisFunctions[i].transpose() * SectorErrsSqVector[iCoeff].asDiagonal().inverse() * basisFunctions[j];
+                LHSMatContainer[iCoeff](i, j) = basisFunctions[i].transpose() * SectorErrsSqVector[iCoeff].asDiagonal().inverse() * basisFunctions[j];
         }
     }
 
@@ -135,11 +137,11 @@ int main(int argc, char **argv)
     {
         continuumLimesRes[iCoeff] = Eigen::VectorXd::Zero(2);
         continuumLimesErr[iCoeff] = Eigen::VectorXd::Zero(2);
-        continuumLimesRes[iCoeff] = (LHSMatConatiner[iCoeff]).fullPivLu().solve(RHSVecContainer[iCoeff]);
+        continuumLimesRes[iCoeff] = (LHSMatContainer[iCoeff]).fullPivLu().solve(RHSVecContainer[iCoeff]);
 
         Eigen::MatrixXd jckLimes = Eigen::MatrixXd::Zero(2, jckNum);
         for (int iJCK = 0; iJCK < jckNum; iJCK++)
-            jckLimes.col(iJCK) = (LHSMatConatiner[iCoeff]).fullPivLu().solve(RHSVecJCKContainer[iCoeff][iJCK]);
+            jckLimes.col(iJCK) = (LHSMatContainer[iCoeff]).fullPivLu().solve(RHSVecJCKContainer[iCoeff][iJCK]);
         for (int i = 0; i < 2; i++)
             continuumLimesErr[iCoeff](i) = std::sqrt(JCKVariance(jckLimes.row(i)));
     }
