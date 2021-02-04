@@ -108,20 +108,26 @@ int main(int argc, char **argv)
         160., 160., 160.;
 
     // basis functions for linear fits
+    //
     // constant ~ 1
     Eigen::VectorXd basisConstant = Eigen::VectorXd::Constant(dataSize, 1);
+
     // linear in temperature ~ T
     Eigen::VectorXd basisLinearT = T;
+
     // quadratic in temperature ~ T^2
     Eigen::VectorXd basisQuadraT(dataSize);
     for (int iT = 0; iT < dataSize; iT++)
         basisQuadraT(iT) = sq(T(iT));
+
     // linear in inverse time lattice squared ~ 1 / Nt^2
     Eigen::VectorXd basisLinearNt = NtInvSq;
+
     // ~ T / Nt^2
     Eigen::VectorXd basisLinearNtLinearT(dataSize);
     for (int iData = 0; iData < dataSize; iData++)
         basisLinearNtLinearT(iData) = T(iData) * NtInvSq(iData);
+        
     // ~ T^2 / Nt^2
     Eigen::VectorXd basisLinearNtQuadraT(dataSize);
     for (int iData = 0; iData < dataSize; iData++)
@@ -140,11 +146,13 @@ int main(int argc, char **argv)
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
         LHSMatContainer[iCoeff] = Eigen::MatrixXd::Zero(paramNum, paramNum);
+        /*
         for (int i = 0; i < paramNum; i++)
         {
             for (int j = 0; j < paramNum; j++)
                 LHSMatContainer[iCoeff](i, j) = basisFunctions[i].transpose() * SectorErrsSqVector[iCoeff].asDiagonal().inverse() * basisFunctions[j];
         }
+        */
 
         // checking something else...
         Eigen::MatrixXd FMat = Eigen::MatrixXd::Zero(dataSize, paramNum);
@@ -161,8 +169,10 @@ int main(int argc, char **argv)
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
         RHSVecContainer[iCoeff] = Eigen::VectorXd::Zero(paramNum);
+        /*
         for (int i = 0; i < paramNum; i++)
             RHSVecContainer[iCoeff](i) = SectorCoeffsVector[iCoeff].transpose() * SectorErrsSqVector[iCoeff].asDiagonal().inverse() * basisFunctions[i];
+        */
 
         // checking something else...
         Eigen::MatrixXd FMat = Eigen::MatrixXd::Zero(dataSize, paramNum);
@@ -216,12 +226,4 @@ int main(int argc, char **argv)
             std::cout << "         " << continuumLimesRes[iCoeff](iParam) << " +/- " << continuumLimesErr[iCoeff](iParam) << std::endl;
         }
     }
-
-    /*
-    for (int i = 0; i < coeffNum; i++)
-    {
-        std::cout << "{" << BSNumbers[i].first << " , " << BSNumbers[i].second << "}" << std::endl;
-        std::cout << (LHSMatContainer[i]).fullPivLu().solve(RHSVecContainer[i]) << "\n" << std::endl;
-    }
-    */
 }
