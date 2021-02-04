@@ -358,7 +358,7 @@ int main(int, char **argv)
     else
         BSNumbers = {{1, 0}, {0, 1}, {1, -1}, {1, 1}, {1, 2}, {1, 3}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {0, 2}, {0, 3}, {3, 0}, {3, 1}, {3, 2}, {3, 3}};
     // number of sectors
-    int sectorNumber = static_cast<int>(BSNumbers.size());
+    //int sectorNumber = static_cast<int>(BSNumbers.size());
 
     // LHS matrix for the linear equation system
     Eigen::MatrixXd LHS = MatLHS(BSNumbers, DOrders, DOrdersMuZero, muB, muS, CInvContainer, CInvMuZero);

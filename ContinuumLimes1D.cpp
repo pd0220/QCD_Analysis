@@ -39,7 +39,7 @@ int main(int argc, char **argv)
         std::cout << "ERROR\nSector cut parameter is not appropriate: instead of " << baryonCut << " it should be 2 or 3" << std::endl;
         std::exit(-2);
     }
-    
+
     // number of jackknife samples
     int const jckNum = std::atoi(argv[3]);
 
@@ -152,6 +152,7 @@ int main(int argc, char **argv)
     // write results to screen
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
-        std::cout << "{" << BSNumbers[iCoeff].first << " , " << BSNumbers[iCoeff].second << "} " << continuumLimesRes[iCoeff](0) << " +/- " << continuumLimesErr[iCoeff](0) << std::endl;
+        std::cout << "{" << BSNumbers[iCoeff].first << " , " << BSNumbers[iCoeff].second << "} "
+                  << continuumLimesRes[iCoeff](0) << " +/- " << continuumLimesErr[iCoeff](0) << std::endl;
     }
 }

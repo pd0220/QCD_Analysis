@@ -27,6 +27,8 @@ add_executable(Extrapolate Extrapolate.cpp)
 add_executable(ContinuumLimes1D ContinuumLimes1D.cpp)
 add_executable(ContinuumLimes2D ContinuumLimes2D.cpp)
 
+target_link_libraries(ContinuumLimes2D PRIVATE Eigen3::Eigen)
+
 set_target_properties(Fit PROPERTIES CXX_STANDARD 17
                                                  CXX_STANDARD_REQUIRED ON
                                                  CXX_EXTENSIONS OFF)

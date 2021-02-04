@@ -960,7 +960,12 @@ auto BasisFuncReal = [](int const &B, int const &S, int const &BOrder, int const
 // ------------------------------------------------------------------------------------------------------------
 
 // ZS function (real chemical potential)
-auto ZFuncReal = [](double const &muB, double const &muS, int const &BOrder, int const &SOrder, std::vector<std::pair<int, int>> const &SectorNumbers, Eigen::VectorXd const &SectorCoeffs) {
+auto ZFuncReal = [](double const &muB,
+                    double const &muS,
+                    int const &BOrder,
+                    int const &SOrder,
+                    std::vector<std::pair<int, int>> const &SectorNumbers,
+                    Eigen::VectorXd const &SectorCoeffs) {
     // number of analysed sectors
     int N = static_cast<int>(SectorNumbers.size());
     // container for results

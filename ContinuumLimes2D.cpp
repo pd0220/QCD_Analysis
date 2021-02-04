@@ -1,7 +1,9 @@
 // continuum limes calculation for sector coefficients
 
-// including used header
+// including used headers
 #include "AnalysisTools.hh"
+//#include "MPRealSupport.hh"
+#include <mpfr.h>
 
 // ------------------------------------------------------------------------------------------------------------
 
@@ -18,6 +20,10 @@ auto FileName = [](std::string const &data) {
 // argv[3] --> number of parameters in the continuum fit
 int main(int argc, char **argv)
 {
+    // declare matrix and vector types with multi-precision scalar type
+    typedef Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic> MatrixXld;
+    typedef Eigen::Matrix<long double, Eigen::Dynamic, 1> VectorXld;
+
     // check length of argument list
     int const argcExpected = 4;
     if (argc > argcExpected)
@@ -127,7 +133,7 @@ int main(int argc, char **argv)
     Eigen::VectorXd basisLinearNtLinearT(dataSize);
     for (int iData = 0; iData < dataSize; iData++)
         basisLinearNtLinearT(iData) = T(iData) * NtInvSq(iData);
-        
+
     // ~ T^2 / Nt^2
     Eigen::VectorXd basisLinearNtQuadraT(dataSize);
     for (int iData = 0; iData < dataSize; iData++)
@@ -198,19 +204,24 @@ int main(int argc, char **argv)
     }
 
     // calculate continnum limes results and estimated errors
-    std::vector<Eigen::VectorXd> continuumLimesRes(coeffNum);
-    std::vector<Eigen::VectorXd> continuumLimesErr(coeffNum);
+    std::vector<VectorXld> continuumLimesRes(coeffNum);
+    std::vector<VectorXld> continuumLimesErr(coeffNum);
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
-        continuumLimesRes[iCoeff] = Eigen::VectorXd::Zero(paramNum);
-        continuumLimesErr[iCoeff] = Eigen::VectorXd::Zero(paramNum);
-        continuumLimesRes[iCoeff] = (LHSMatContainer[iCoeff]).fullPivLu().solve(RHSVecContainer[iCoeff]);
+        continuumLimesRes[iCoeff] = VectorXld::Zero(paramNum);
+        continuumLimesErr[iCoeff] = VectorXld::Zero(paramNum);
+        MatrixXld tempLHS = LHSMatContainer[iCoeff].cast<long double>();
+        VectorXld tempRHS = RHSVecContainer[iCoeff].cast<long double>();
+        continuumLimesRes[iCoeff] = (tempLHS).fullPivLu().solve(tempRHS);
 
-        Eigen::MatrixXd jckLimes = Eigen::MatrixXd::Zero(paramNum, jckNum);
+        MatrixXld jckLimes = MatrixXld::Zero(paramNum, jckNum);
         for (int iJCK = 0; iJCK < jckNum; iJCK++)
-            jckLimes.col(iJCK) = (LHSMatContainer[iCoeff]).fullPivLu().solve(RHSVecJCKContainer[iCoeff][iJCK]);
+        {
+            VectorXld tempRHSJCK = RHSVecJCKContainer[iCoeff][iJCK].cast<long double>();
+            jckLimes.col(iJCK) = (tempLHS).fullPivLu().solve(tempRHSJCK);
+        }
         for (int i = 0; i < paramNum; i++)
-            continuumLimesErr[iCoeff](i) = std::sqrt(JCKVariance(jckLimes.row(i)));
+            continuumLimesErr[iCoeff](i) = std::sqrt(JCKVariance(jckLimes.row(i).cast<double>()));
     }
 
     // sectors
