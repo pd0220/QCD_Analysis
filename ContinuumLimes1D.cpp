@@ -119,7 +119,8 @@ int main(int argc, char **argv)
     }
 
     // RHS vectors for jackknife error estimation
-    std::vector<std::vector<Eigen::VectorXd>> RHSVecJCKContainer(coeffNum);
+    std::vector<std::vector<Eigen::VectorXd>>
+        RHSVecJCKContainer(coeffNum);
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
         RHSVecJCKContainer[iCoeff] = std::vector<Eigen::VectorXd>(jckNum, Eigen::VectorXd::Zero(2));
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
     // write results to screen
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
-        std::cout << "{" << BSNumbers[iCoeff].first << " , " << BSNumbers[iCoeff].second << "} "
-                  << continuumLimesRes[iCoeff](0) << " +/- " << continuumLimesErr[iCoeff](0) << std::endl;
+        //std::cout << "{" << BSNumbers[iCoeff].first << " , " << BSNumbers[iCoeff].second << "} "
+        std::cout << continuumLimesRes[iCoeff](0) << " " << continuumLimesErr[iCoeff](0) << std::endl;
     }
 }

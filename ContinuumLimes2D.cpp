@@ -212,13 +212,13 @@ int main(int argc, char **argv)
         continuumLimesErr[iCoeff] = VectorXld::Zero(paramNum);
         MatrixXld tempLHS = LHSMatContainer[iCoeff].cast<long double>();
         VectorXld tempRHS = RHSVecContainer[iCoeff].cast<long double>();
-        continuumLimesRes[iCoeff] = (tempLHS).fullPivLu().solve(tempRHS);
+        continuumLimesRes[iCoeff] = (tempLHS).partialPivLu().solve(tempRHS);
 
         MatrixXld jckLimes = MatrixXld::Zero(paramNum, jckNum);
         for (int iJCK = 0; iJCK < jckNum; iJCK++)
         {
             VectorXld tempRHSJCK = RHSVecJCKContainer[iCoeff][iJCK].cast<long double>();
-            jckLimes.col(iJCK) = (tempLHS).fullPivLu().solve(tempRHSJCK);
+            jckLimes.col(iJCK) = (tempLHS).partialPivLu().solve(tempRHSJCK);
         }
         for (int i = 0; i < paramNum; i++)
             continuumLimesErr[iCoeff](i) = std::sqrt(JCKVariance(jckLimes.row(i).cast<double>()));
