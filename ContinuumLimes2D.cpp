@@ -206,20 +206,30 @@ int main(int argc, char **argv)
     // calculate continnum limes results and estimated errors
     std::vector<VectorXld> continuumLimesRes(coeffNum);
     std::vector<VectorXld> continuumLimesErr(coeffNum);
+    // jackknife samples
+    std::vector<MatrixXld> continuumLimesJCK(coeffNum);
     for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
     {
+        // initialise to zero
         continuumLimesRes[iCoeff] = VectorXld::Zero(paramNum);
         continuumLimesErr[iCoeff] = VectorXld::Zero(paramNum);
+        continuumLimesJCK[iCoeff] = MatrixXld::Zero(paramNum, jckNum);
+        // temporary LHS matrix and RHS vector
         MatrixXld tempLHS = LHSMatContainer[iCoeff].cast<long double>();
         VectorXld tempRHS = RHSVecContainer[iCoeff].cast<long double>();
+        // calculating coefficients
         continuumLimesRes[iCoeff] = (tempLHS).partialPivLu().solve(tempRHS);
 
+        // repeat calculation with jackknife samples and error estimation
         MatrixXld jckLimes = MatrixXld::Zero(paramNum, jckNum);
         for (int iJCK = 0; iJCK < jckNum; iJCK++)
         {
             VectorXld tempRHSJCK = RHSVecJCKContainer[iCoeff][iJCK].cast<long double>();
             jckLimes.col(iJCK) = (tempLHS).partialPivLu().solve(tempRHSJCK);
         }
+        // save new jackknife samples
+        continuumLimesJCK[iCoeff] = jckLimes;
+        // estimate jackknife errors
         for (int i = 0; i < paramNum; i++)
             continuumLimesErr[iCoeff](i) = std::sqrt(JCKVariance(jckLimes.row(i).cast<double>()));
     }
@@ -227,14 +237,7 @@ int main(int argc, char **argv)
     // sectors
     std::vector<std::pair<int, int>> BSNumbers = {{1, 0}, {0, 1}, {1, -1}, {1, 1}, {1, 2}, {1, 3}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {0, 2}, {0, 3}, {3, 0}, {3, 1}, {3, 2}, {3, 3}};
 
-    // write results to screen
-    for (int iCoeff = 0; iCoeff < coeffNum; iCoeff++)
-    {
-        std::cout << "{" << BSNumbers[iCoeff].first << " , " << BSNumbers[iCoeff].second << "} " << std::endl;
-
-        for (int iParam = 0; iParam < paramNum; iParam++)
-        {
-            std::cout << "         " << continuumLimesRes[iCoeff](iParam) << " +/- " << continuumLimesErr[iCoeff](iParam) << std::endl;
-        }
-    }
+    // focusing on (B, S) = (2, 0) continuum limes (a0, a1, a2)
+    for (int iParam = 0; iParam < 3; iParam++)
+        std::cout << continuumLimesRes[2](iParam) << " " << continuumLimesJCK[2].row(iParam) << std::endl;
 }
