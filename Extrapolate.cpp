@@ -9,7 +9,7 @@
 // constants
 int const maxIteration = 10000;
 int const muBNum = 200;
-double const epsExtrapolation = 1e-10;
+double const epsExtrapolation = 1e-15;
 double const muBMin = 0.01;
 double const muBMax = 2.00;
 
@@ -81,9 +81,11 @@ int main(int argc, char **argv)
     Eigen::VectorXd Z12 = Eigen::VectorXd::Zero(muBNum);
     Eigen::VectorXd Z31 = Eigen::VectorXd::Zero(muBNum);
     Eigen::VectorXd Z42 = Eigen::VectorXd::Zero(muBNum);
+    Eigen::VectorXd Z112 = Eigen::VectorXd::Zero(muBNum);
     Eigen::MatrixXd Z12Err = Eigen::MatrixXd::Zero(muBNum, PMatrix.cols() - 1);
     Eigen::MatrixXd Z31Err = Eigen::MatrixXd::Zero(muBNum, PMatrix.cols() - 1);
     Eigen::MatrixXd Z42Err = Eigen::MatrixXd::Zero(muBNum, PMatrix.cols() - 1);
+    Eigen::MatrixXd Z112Err = Eigen::MatrixXd::Zero(muBNum, PMatrix.cols() - 1);
 
     // extra data 1
     Eigen::VectorXd Diff31 = Eigen::VectorXd::Zero(muBNum);
@@ -96,6 +98,7 @@ int main(int argc, char **argv)
         Z12(i) = ZFuncReal(muB(i), muS(i, 0), 1, 0, SectorNumbers, PMatrix.col(0)) / ZFuncReal(muB(i), muS(i, 0), 2, 0, SectorNumbers, PMatrix.col(0));
         Z31(i) = ZFuncReal(muB(i), muS(i, 0), 3, 0, SectorNumbers, PMatrix.col(0)) / ZFuncReal(muB(i), muS(i, 0), 1, 0, SectorNumbers, PMatrix.col(0));
         Z42(i) = ZFuncReal(muB(i), muS(i, 0), 4, 0, SectorNumbers, PMatrix.col(0)) / ZFuncReal(muB(i), muS(i, 0), 2, 0, SectorNumbers, PMatrix.col(0));
+        Z112(i) = ZFuncReal(muB(i), muS(i, 0), 1, 1, SectorNumbers, PMatrix.col(0)) / ZFuncReal(muB(i), muS(i, 0), 0, 2, SectorNumbers, PMatrix.col(0));
 
         // extra 1 results
         Diff31(i) = Z31(i) - Z31(0);
@@ -107,6 +110,7 @@ int main(int argc, char **argv)
             Z12Err(i, iSample) = ZFuncReal(muB(i), muS(i, iSample + 1), 1, 0, SectorNumbers, PMatrix.col(iSample + 1)) / ZFuncReal(muB(i), muS(i, iSample + 1), 2, 0, SectorNumbers, PMatrix.col(iSample + 1));
             Z31Err(i, iSample) = ZFuncReal(muB(i), muS(i, iSample + 1), 3, 0, SectorNumbers, PMatrix.col(iSample + 1)) / ZFuncReal(muB(i), muS(i, iSample + 1), 1, 0, SectorNumbers, PMatrix.col(iSample + 1));
             Z42Err(i, iSample) = ZFuncReal(muB(i), muS(i, iSample + 1), 4, 0, SectorNumbers, PMatrix.col(iSample + 1)) / ZFuncReal(muB(i), muS(i, iSample + 1), 2, 0, SectorNumbers, PMatrix.col(iSample + 1));
+            Z112Err(i, iSample) = ZFuncReal(muB(i), muS(i, iSample + 1), 1, 1, SectorNumbers, PMatrix.col(iSample + 1)) / ZFuncReal(muB(i), muS(i, iSample + 1), 0, 2, SectorNumbers, PMatrix.col(iSample + 1)); 
 
             // extra 1 results
             Diff31Err(i, iSample) = Z31Err(i, iSample) - Z31Err(0, iSample);
@@ -114,6 +118,14 @@ int main(int argc, char **argv)
         }
     }
 
+    // write results to screen
+    for (int iMuB = 0; iMuB < muBNum; iMuB++)
+    {
+        std::cout << muB(iMuB) << " "
+                  << Z31(iMuB) << " " << Z31Err.row(iMuB) << std::endl;
+    }
+
+    /*
     for (int i = 0; i < muBNum; i++)
     {
         // write to screen
@@ -125,6 +137,7 @@ int main(int argc, char **argv)
         //<< Diff31(i) << " " << std::sqrt(JCKVariance(Diff31Err.row(i))) << " "
         //<< Diff42(i) << " " << std::sqrt(JCKVariance(Diff42Err.row(i))) << std::endl;
     }
+    */
 
     /*
     for (int i = 0; i < muBNum; i++)

@@ -26,6 +26,7 @@ add_executable(Fit Fit.cpp)
 add_executable(Extrapolate Extrapolate.cpp)
 add_executable(ContinuumLimes1D ContinuumLimes1D.cpp)
 add_executable(ContinuumLimes2D ContinuumLimes2D.cpp)
+add_executable(ContinuumLimes2DEx ContinuumLimes2DEx.cpp)
 
 target_link_libraries(ContinuumLimes2D PRIVATE Eigen3::Eigen)
 

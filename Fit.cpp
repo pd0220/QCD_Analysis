@@ -422,6 +422,7 @@ int main(int, char **argv)
     }
     */
 
+    /*
     for (int i = 0; i < coeffVector.size(); i++)
     {
         std::cout << coeffVector[i] << " ";
@@ -430,5 +431,11 @@ int main(int, char **argv)
             std::cout << JCK_coeffVector[iJCK](i) << " ";
         }
         std::cout << std::endl;
+    }
+    */
+
+    for (int i = 0; i < coeffVector.size(); i++)
+    {
+        std::cout << coeffVector(i) << " " << errorVec(i) << std::endl;
     }
 }
