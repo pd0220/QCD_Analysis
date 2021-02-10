@@ -745,6 +745,34 @@ auto VecRHS = [](std::vector<std::pair<int, int>> const &BSNumbers,
 
 //
 //
+// MATRIX MANIPULATION FUNCTIONS
+// (needed for extra feature to calculate covariance matrices for every single jackknife sample in sector fits)
+//
+//
+
+// remove column with given index from matrix
+auto RemoveCol = [](Eigen::MatrixXd const &mat, int const &iCol) {
+    // sizes of original matrix
+    int rows = mat.rows();
+    int cols = mat.cols();
+    // initialise new matrix to store the result (with new dimensions)
+    Eigen::MatrixXd resMat(rows, cols - 1);
+
+    // fill new matrix
+    for (int i = 0; i < cols; i++)
+    {
+        if (i < iCol)
+            resMat.col(i) = mat.col(i);
+        else if (i > iCol)
+            resMat.col(i - 1) = mat.col(i); 
+    }
+
+    // return new matrix
+    return resMat;
+};
+
+//
+//
 // HADRON RESONANCE GAS (HRG) FUNCTIONS
 //
 //

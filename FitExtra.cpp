@@ -371,6 +371,7 @@ int main(int, char **argv)
 
     // error estimation via jackknife method
     std::vector<Eigen::VectorXd> JCK_RHS(jckNum);
+    std::vector<Eigen::MatrixXd> JCK_LHS(jckNum);
     for (int i = 0; i < jckNum; i++)
     {
         // y data matrix for jackknife fits
@@ -389,31 +390,35 @@ int main(int, char **argv)
         yMatJCKMuZero(6, 0) = ZBBSSJCKs.col(i)(0);
         yMatJCKMuZero(7, 0) = ZBBBSJCKs.col(i)(0);
 
+        // EXTRA FEATURE
+        //
+        // inverse covariance matrix blocks for every single jackknife sample
+        std::vector<Eigen::MatrixXd> CInvContainerJCK(N - 1, Eigen::MatrixXd(numOfQs, numOfQs));
+        for (int iMuB = 0; iMuB < N - 1; iMuB++)
+        {
+            CInvContainerJCK[iMuB] = BlockCInverseJCK(RemoveCol(JCKSamplesForFit, i), numOfQs, iMuB, jckNum - 1);
+        }
+
+        // inverse covariance matrix blocks at mu = 0 for every single jackknife sample
+        Eigen::MatrixXd CInvMuZeroJCK = BlockCInverseJCK(RemoveCol(JCKSamplesForFitMuZero, i), numOfQsMuZero, 0, jckNum - 1);
+
         // RHS vectors from jackknife samples
-        JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatJCKMuZero, muB, muS, CInvContainer, CInvMuZero);
+        JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatJCKMuZero, muB, muS, CInvContainerJCK, CInvMuZeroJCK);
+
+        // LHS matrix from jackknife samples
+        JCK_LHS[i] = MatLHS(BSNumbers, DOrders, DOrdersMuZero, muB, muS, CInvContainerJCK, CInvMuZeroJCK);
     }
+
     // fit with jackknife samples
     std::vector<Eigen::VectorXd> JCK_coeffVector(jckNum);
     for (int i = 0; i < jckNum; i++)
     {
-        JCK_coeffVector[i] = (LHS).fullPivLu().solve(JCK_RHS[i]);
+        JCK_coeffVector[i] = (JCK_LHS[i]).fullPivLu().solve(JCK_RHS[i]);
     }
     // estimate error from jackknife fits
     Eigen::VectorXd errorVec = JCKFitErrorEstimation(coeffVector, JCK_coeffVector);
 
-    for (int i = 0; i < coeffVector.size(); i++)
-    {
-        std::cout << coeffVector(i) << " " << errorVec(i) << std::endl;
-    }
-
-    /*
-    // write result coefficients to screen
-    std::cout << "\nFitted parameters:" << std::endl;
-    for (int coeffIndex = 0; coeffIndex < sectorNumber; coeffIndex++)
-    {
-        std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
-    }
-    
+    // write results to screen
     for (int i = 0; i < coeffVector.size(); i++)
     {
         std::cout << coeffVector[i] << " ";
@@ -422,6 +427,21 @@ int main(int, char **argv)
             std::cout << JCK_coeffVector[iJCK](i) << " ";
         }
         std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << coeffVector[6] << " ";
+    for (int iJCK = 0; iJCK < jckNum; iJCK++)
+    {
+        std::cout << JCK_coeffVector[iJCK](6) << " ";
+    }
+    std::cout << std::endl;
+
+    /*
+    // write result coefficients to screen
+    std::cout << "\nFitted parameters:" << std::endl;
+    for (int coeffIndex = 0; coeffIndex < sectorNumber; coeffIndex++)
+    {
+        std::cout << "{" << BSNumbers[coeffIndex].first << " , " << BSNumbers[coeffIndex].second << "}: " << coeffVector(coeffIndex) << " +/- " << errorVec(coeffIndex) << std::endl;
     }
     */
 }
