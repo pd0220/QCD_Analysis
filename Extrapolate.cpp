@@ -118,7 +118,7 @@ int main(int argc, char **argv)
         }
     }
 
-    // write results to screen
+    // write results to screen (one ratio only with jackknife samples)
     for (int iMuB = 0; iMuB < muBNum; iMuB++)
     {
         std::cout << muB(iMuB) << " "
@@ -126,6 +126,7 @@ int main(int argc, char **argv)
     }
 
     /*
+    // write results to screen (more ratios with jackknife error only)
     for (int i = 0; i < muBNum; i++)
     {
         // write to screen
@@ -140,6 +141,7 @@ int main(int argc, char **argv)
     */
 
     /*
+    // write results to screen (more ratios with jackknife errors)
     for (int i = 0; i < muBNum; i++)
     {
         std::cout << muB(i) << " ";
