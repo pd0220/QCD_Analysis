@@ -60,7 +60,7 @@ int main(int, char **argv)
     FitMat(0, 2) = 0;
     // muS = 0
     FitMat(0, 3) = 0;
-    // non-zero data (imZu = 0 and imZs = 0 at mu = 0)
+    // non-zero data
     FitMat.row(0).segment(4 + 2 * (jckNum + 2), (ZNum - 2) * (jckNum + 2)) = rawDataMatMuZero.row(0).segment(2, (ZNum - 2) * (jckNum + 2));
 
     // number of rows of fit matrix
@@ -358,7 +358,7 @@ int main(int, char **argv)
     else
         BSNumbers = {{1, 0}, {0, 1}, {1, -1}, {1, 1}, {1, 2}, {1, 3}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {0, 2}, {0, 3}, {3, 0}, {3, 1}, {3, 2}, {3, 3}};
     // number of sectors
-    //int sectorNumber = static_cast<int>(BSNumbers.size());
+    int sectorNumber = static_cast<int>(BSNumbers.size());
 
     // LHS matrix for the linear equation system
     Eigen::MatrixXd LHS = MatLHS(BSNumbers, DOrders, DOrdersMuZero, muB, muS, CInvContainer, CInvMuZero);
@@ -372,6 +372,7 @@ int main(int, char **argv)
     // error estimation via jackknife method
     std::vector<Eigen::VectorXd> JCK_RHS(jckNum);
     std::vector<Eigen::MatrixXd> JCK_LHS(jckNum);
+
     for (int i = 0; i < jckNum; i++)
     {
         // y data matrix for jackknife fits
@@ -393,14 +394,49 @@ int main(int, char **argv)
         // EXTRA FEATURE
         //
         // inverse covariance matrix blocks for every single jackknife sample
+        //
+        // number of rows (for simplicity)
+        int JCKRow = JCKSamplesForFit.rows();
+        int JCKRowMuZero = JCKSamplesForFitMuZero.rows();
+        // calculate blocks (hopefully original)
+        Eigen::MatrixXd BlocksForFit = Eigen::MatrixXd::Zero(JCKRow, jckNum);
+        // calculate blocks (hopefully original) az mu = 0
+        Eigen::MatrixXd BlocksForFitMuZero = Eigen::MatrixXd::Zero(JCKRowMuZero, jckNum);
+        for (int iRow = 0; iRow < JCKRow; iRow++)
+        {
+            // calculate blocks (without sample number reduction)
+            BlocksForFit.row(iRow) = ReducedBlocks(JCKSamplesForFit.row(iRow), 1);
+        }
+        // repeat for mu = 0 data
+        for (int iRow = 0; iRow < JCKRowMuZero; iRow++)
+        {
+            // calculate blocks (without sample number reduction)
+            BlocksForFitMuZero.row(iRow) = ReducedBlocks(JCKSamplesForFitMuZero.row(iRow), 1);
+        }
+        // remove one of the blocks
+        Eigen::MatrixXd ExtraBlocksForFit = RemoveCol(BlocksForFit, i);
+        Eigen::MatrixXd ExtraBlocksForFitMuZero = RemoveCol(BlocksForFitMuZero, i);
+        // calculate the new ,,sub'' jackknife samples
+        Eigen::MatrixXd ExtraJCKSamplesForFit = Eigen::MatrixXd::Zero(JCKRow, jckNum - 1);
+        Eigen::MatrixXd ExtraJCKSamplesForFitMuZero = Eigen::MatrixXd::Zero(JCKRowMuZero, jckNum - 1);
+        for (int iRow = 0; iRow < JCKRow; iRow++)
+        {
+            ExtraJCKSamplesForFit.row(iRow) = JCKSamplesCalculation(ExtraBlocksForFit.row(iRow));
+        }
+        // repeat for mu = 0 data
+        for (int iRow = 0; iRow < JCKRowMuZero; iRow++)
+        {
+            ExtraJCKSamplesForFitMuZero.row(iRow) = JCKSamplesCalculation(ExtraBlocksForFitMuZero.row(iRow));
+        }
+        // new covariance matrix blocks container
         std::vector<Eigen::MatrixXd> CInvContainerJCK(N - 1, Eigen::MatrixXd(numOfQs, numOfQs));
         for (int iMuB = 0; iMuB < N - 1; iMuB++)
         {
-            CInvContainerJCK[iMuB] = BlockCInverseJCK(RemoveCol(JCKSamplesForFit, i), numOfQs, iMuB, jckNum - 1);
+            CInvContainerJCK[iMuB] = BlockCInverseJCK(ExtraJCKSamplesForFit, numOfQs, iMuB, jckNum - 1);
         }
 
         // inverse covariance matrix blocks at mu = 0 for every single jackknife sample
-        Eigen::MatrixXd CInvMuZeroJCK = BlockCInverseJCK(RemoveCol(JCKSamplesForFitMuZero, i), numOfQsMuZero, 0, jckNum - 1);
+        Eigen::MatrixXd CInvMuZeroJCK = BlockCInverseJCK(ExtraJCKSamplesForFitMuZero, numOfQsMuZero, 0, jckNum - 1);
 
         // RHS vectors from jackknife samples
         JCK_RHS[i] = VecRHS(BSNumbers, DOrders, DOrdersMuZero, yMatJCK, yMatJCKMuZero, muB, muS, CInvContainerJCK, CInvMuZeroJCK);
@@ -428,13 +464,6 @@ int main(int, char **argv)
         }
         std::cout << std::endl;
     }
-    std::cout << std::endl;
-    std::cout << coeffVector[6] << " ";
-    for (int iJCK = 0; iJCK < jckNum; iJCK++)
-    {
-        std::cout << JCK_coeffVector[iJCK](6) << " ";
-    }
-    std::cout << std::endl;
 
     /*
     // write result coefficients to screen

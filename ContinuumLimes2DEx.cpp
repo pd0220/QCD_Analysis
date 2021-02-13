@@ -9,7 +9,8 @@
 
 // helper lambda for reading files
 auto FileName = [](std::string const &ZRatio, std::string const &data) {
-    return "../ExtrapolationResult/" + ZRatio + "/" + ZRatio + "." + data + ".txt";
+    return "../RESULTS/Extrapolation/" + ZRatio + "/" + ZRatio + "." + data + ".txt";
+    //return "../ExtrapolationResult/" + ZRatio + "/" + ZRatio + "." + data + ".txt";
 };
 
 // ------------------------------------------------------------------------------------------------------------

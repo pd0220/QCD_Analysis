@@ -9,7 +9,7 @@
 
 // helper lambda for reading files
 auto FileName = [](std::string const &data) {
-    return "../FitResult/Sectors." + data + ".txt";
+    return "../RESULTS/SectorCoeffs/Sectors." + data + ".txt";
 };
 
 // ------------------------------------------------------------------------------------------------------------

@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     for (int iMuB = 0; iMuB < muBNum; iMuB++)
     {
         std::cout << muB(iMuB) << " "
-                  << Z31(iMuB) << " " << Z31Err.row(iMuB) << std::endl;
+                  << Z112(iMuB) << " " << Z112Err.row(iMuB) << std::endl;
     }
 
     /*
