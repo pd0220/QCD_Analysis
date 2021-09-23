@@ -8,10 +8,10 @@
 
 // constants
 int const maxIteration = 10000;
-int const muBNum = 200;
+int const muBNum = 130;
 double const epsExtrapolation = 1e-15;
 double const muBMin = 0.01;
-double const muBMax = 2.00;
+double const muBMax = 1.30;
 
 // main function
 // argv[1] --> file name to use

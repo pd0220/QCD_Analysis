@@ -28,6 +28,7 @@ add_executable(ContinuumLimes1D ContinuumLimes1D.cpp)
 add_executable(ContinuumLimes2D ContinuumLimes2D.cpp)
 add_executable(ContinuumLimes2DEx ContinuumLimes2DEx.cpp)
 add_executable(FitExtra FitExtra.cpp)
+add_executable(HRGCalculations HRGCalculations.cpp)
 
 target_link_libraries(ContinuumLimes2D PRIVATE Eigen3::Eigen)
 

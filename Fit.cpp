@@ -401,10 +401,21 @@ int main(int, char **argv)
     // estimate error from jackknife fits
     Eigen::VectorXd errorVec = JCKFitErrorEstimation(coeffVector, JCK_coeffVector);
 
+    for (int i = 0; i < muB.size(); i++)
+        std::cout << muB(i) << " " << muS(i) << " " << imZBVals(i) << " " << imZSVals(i) << std::endl;
+
+    /*
+    // write results to screen
     for (int i = 0; i < coeffVector.size(); i++)
     {
-        std::cout << coeffVector(i) << " " << errorVec(i) << std::endl;
+        std::cout << coeffVector[i] << " ";
+        for (int iJCK = 0; iJCK < jckNum; iJCK++)
+        {
+            std::cout << JCK_coeffVector[iJCK](i) << " ";
+        }
+        std::cout << std::endl;
     }
+    */
 
     /*
     // write result coefficients to screen
