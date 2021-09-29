@@ -19,7 +19,8 @@
 #include "Hadron.hh"
 
 // lambda to calculate squares
-auto sq = [](auto const &x) {
+auto sq = [](auto const &x)
+{
     return x * x;
 };
 
@@ -36,7 +37,8 @@ std::complex<double> const ci(0., 1.);
 //
 
 // read file with dataset into a raw matrix
-auto ReadFile = [](std::string const &fileName) {
+auto ReadFile = [](std::string const &fileName)
+{
     // start reading
     std::ifstream fileToRead;
     fileToRead.open(fileName);
@@ -101,7 +103,8 @@ auto ReadFile = [](std::string const &fileName) {
 //
 
 // container for all the hadrons in the PDG list
-auto HadronList = [](std::string const &PDGList) {
+auto HadronList = [](std::string const &PDGList)
+{
     // start reading
     std::ifstream fileToRead;
 
@@ -226,105 +229,120 @@ auto HadronList = [](std::string const &PDGList) {
 //
 
 // imZB
-auto imZBCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto imZBCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (2 * Z[0] + Z[1]) / 3;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // imZQ
-auto imZQCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto imZQCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (Z[0] - Z[1]) / 3;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // imZS
-auto imZSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto imZSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return -Z[1];
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBB
-auto ZBBCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBBCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (2 * Z[2] + Z[5] + 4 * Z[4] + 2 * Z[3]) / 9;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZQQ
-auto ZQQCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZQQCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (5 * Z[2] + Z[5] - 2 * Z[4] - 4 * Z[3]) / 9;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZSS
-auto ZSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZSSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return Z[5];
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZII
-auto ZIICalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZIICalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (Z[2] - Z[3]) / 2;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBQ
-auto ZBQCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBQCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (Z[2] - Z[5] - Z[4] + Z[3]) / 9;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBS
-auto ZBSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return -(Z[5] + 2 * Z[4]) / 3;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZQS
-auto ZQSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZQSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (Z[5] - Z[4]) / 3;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBBBB
-auto ZBBBBCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBBBBCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (2. * Z[6] + Z[14] + 8. * Z[7] + 8. * Z[8] + 8. * Z[13] + 6. * Z[9] + 12. * Z[11] + 24. * Z[10] + 12. * Z[12]) / 81.;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZSSSS
-auto ZSSSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZSSSSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return Z[14];
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBSSS
-auto ZBSSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBSSSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return -(2. * Z[13] + Z[14]) / 3.;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBBSS
-auto ZBBSSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBBSSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return (2. * Z[11] + 2. * Z[12] + 4. * Z[13] + Z[14]) / 9.;
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // ZBBBS
-auto ZBBBSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
+auto ZBBBSCalc = [](std::vector<Eigen::VectorXd> const &Z)
+{
     return -(2. * Z[8] + Z[14] + 6. * Z[10] + 6. * Z[11] + 6. * Z[13] + 6. * Z[12]) / 27.;
 };
 
@@ -336,7 +354,8 @@ auto ZBBBSCalc = [](std::vector<Eigen::VectorXd> const &Z) {
 //
 
 // calculate variance (for jackknife samples)
-auto JCKVariance = [](Eigen::VectorXd const &JCKSamples) {
+auto JCKVariance = [](Eigen::VectorXd const &JCKSamples)
+{
     // size of vector
     int N = JCKSamples.size();
     // pre-factor
@@ -357,14 +376,16 @@ auto JCKVariance = [](Eigen::VectorXd const &JCKSamples) {
 // ------------------------------------------------------------------------------------------------------------
 
 // general jackknife error calculator for susceptibilities
-auto ZError = [](Eigen::VectorXd const &Z) {
+auto ZError = [](Eigen::VectorXd const &Z)
+{
     return std::sqrt(JCKVariance(Z.segment(2, Z.size() - 2)));
 };
 
 // ------------------------------------------------------------------------------------------------------------
 
 // calculate original block means (and reducing their number by averaging) from jackknife samples
-auto ReducedBlocks = [](Eigen::VectorXd const &JCKSamplesOld, int const &divisor) {
+auto ReducedBlocks = [](Eigen::VectorXd const &JCKSamplesOld, int const &divisor)
+{
     // number of samples
     int NOld = JCKSamplesOld.size();
     // test if divisor is correct for the original sample number
@@ -400,7 +421,8 @@ auto ReducedBlocks = [](Eigen::VectorXd const &JCKSamplesOld, int const &divisor
 // ------------------------------------------------------------------------------------------------------------
 
 // calculate jackknife samples from block means
-auto JCKSamplesCalculation = [](Eigen::VectorXd const &blocks) {
+auto JCKSamplesCalculation = [](Eigen::VectorXd const &blocks)
+{
     // number of blocks
     int lengthBlocks = blocks.size();
     // vector for jackknife samples
@@ -425,7 +447,8 @@ auto JCKSamplesCalculation = [](Eigen::VectorXd const &blocks) {
 // ------------------------------------------------------------------------------------------------------------
 
 // general jackknife error calculator for susceptibilities with sample number reductions (according to divisors)
-auto ZErrorJCKReduced = [](Eigen::VectorXd const &Z, int const &ZDivisor) {
+auto ZErrorJCKReduced = [](Eigen::VectorXd const &Z, int const &ZDivisor)
+{
     // number of jackknife samples
     int NOld = Z.size() - 2;
     // get new jackknife samples via calculating old blocks and reducing their number by averaging
@@ -436,7 +459,8 @@ auto ZErrorJCKReduced = [](Eigen::VectorXd const &Z, int const &ZDivisor) {
 // ------------------------------------------------------------------------------------------------------------
 
 // estimation of function fit error from jackknife sample fits
-auto JCKFitErrorEstimation = [](Eigen::VectorXd const &coeffVector, std::vector<Eigen::VectorXd> const &JCK_coeffVector) {
+auto JCKFitErrorEstimation = [](Eigen::VectorXd const &coeffVector, std::vector<Eigen::VectorXd> const &JCK_coeffVector)
+{
     // number of coefficients
     int numOfCoeffs = coeffVector.size();
     // number of jackknife samples
@@ -470,7 +494,8 @@ auto JCKFitErrorEstimation = [](Eigen::VectorXd const &coeffVector, std::vector<
 //
 
 // calculate correlation coefficients of two datasets with given means (better this way) (jackknife)
-auto CorrCoeffJCK = [](Eigen::VectorXd const &vec1, Eigen::VectorXd const &vec2, double const &mean1, double const &mean2) {
+auto CorrCoeffJCK = [](Eigen::VectorXd const &vec1, Eigen::VectorXd const &vec2, double const &mean1, double const &mean2)
+{
     // number of jackknife samples
     double NJck = (double)vec1.size();
 
@@ -488,7 +513,8 @@ auto CorrCoeffJCK = [](Eigen::VectorXd const &vec1, Eigen::VectorXd const &vec2,
 // ------------------------------------------------------------------------------------------------------------
 
 // block from the blockdiagonal covariance matrix (jackknife)
-auto BlockCInverseJCK = [](Eigen::MatrixXd const &JCKs, int const &numOfQs, int const &qIndex, int const &jckNum) {
+auto BlockCInverseJCK = [](Eigen::MatrixXd const &JCKs, int const &numOfQs, int const &qIndex, int const &jckNum)
+{
     // choose appropriate jackknife samples from given JCK matrix
     Eigen::MatrixXd JCKsQ(numOfQs, jckNum);
     for (int i = 0; i < numOfQs; i++)
@@ -543,7 +569,8 @@ auto BasisFunc = [](int const &B,
                     int const &SOrder,
                     Eigen::VectorXd const &muB,
                     Eigen::VectorXd const &muS,
-                    int const &index) {
+                    int const &index)
+{
     // total number of partial derivations
     int FullOrder = BOrder + SOrder;
     // first derivative
@@ -574,7 +601,8 @@ auto MatElement = [](int const &i,
                      Eigen::VectorXd const &muB,
                      Eigen::VectorXd const &muS,
                      std::vector<Eigen::MatrixXd> const &CInvContainer,
-                     Eigen::MatrixXd const &CInvMuZero) {
+                     Eigen::MatrixXd const &CInvMuZero)
+{
     // number of quantites to fit
     int numOfQs = static_cast<int>(DOrders.size());
     int numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
@@ -631,7 +659,8 @@ auto MatLHS = [](std::vector<std::pair<int, int>> const &BSNumbers,
                  Eigen::VectorXd const &muB,
                  Eigen::VectorXd const &muS,
                  std::vector<Eigen::MatrixXd> const &CInvContainer,
-                 Eigen::MatrixXd const &CInvMuZero) {
+                 Eigen::MatrixXd const &CInvMuZero)
+{
     // size of matrix
     int size = static_cast<int>(BSNumbers.size());
 
@@ -663,7 +692,8 @@ auto VecElement = [](int const &i,
                      Eigen::VectorXd const &muB,
                      Eigen::VectorXd const &muS,
                      std::vector<Eigen::MatrixXd> const &CInvContainer,
-                     Eigen::MatrixXd const &CInvMuZero) {
+                     Eigen::MatrixXd const &CInvMuZero)
+{
     // number of quantites to fit
     int numOfQs = static_cast<int>(DOrders.size());
     int numOfQsMuZero = static_cast<int>(DOrdersMuZero.size());
@@ -726,7 +756,8 @@ auto VecRHS = [](std::vector<std::pair<int, int>> const &BSNumbers,
                  Eigen::VectorXd const &muB,
                  Eigen::VectorXd const &muS,
                  std::vector<Eigen::MatrixXd> const &CInvContainer,
-                 Eigen::MatrixXd const &CInvMuZero) {
+                 Eigen::MatrixXd const &CInvMuZero)
+{
     // size of vector
     int size = static_cast<int>(BSNumbers.size());
 
@@ -751,7 +782,8 @@ auto VecRHS = [](std::vector<std::pair<int, int>> const &BSNumbers,
 //
 
 // remove column with given index from matrix
-auto RemoveCol = [](Eigen::MatrixXd const &mat, int const &iCol) {
+auto RemoveCol = [](Eigen::MatrixXd const &mat, int const &iCol)
+{
     // sizes of original matrix
     int rows = mat.rows();
     int cols = mat.cols();
@@ -764,7 +796,7 @@ auto RemoveCol = [](Eigen::MatrixXd const &mat, int const &iCol) {
         if (i < iCol)
             resMat.col(i) = mat.col(i);
         else if (i > iCol)
-            resMat.col(i - 1) = mat.col(i); 
+            resMat.col(i - 1) = mat.col(i);
     }
 
     // return new matrix
@@ -778,7 +810,8 @@ auto RemoveCol = [](Eigen::MatrixXd const &mat, int const &iCol) {
 //
 
 // determine eta function for given particle type (boson / fermion)
-auto EtaDetermination = [](Hadron const &H) {
+auto EtaDetermination = [](Hadron const &H)
+{
     // get particle type
     std::string particleType = H.getType();
 
@@ -802,7 +835,8 @@ auto EtaDetermination = [](Hadron const &H) {
 
 // partial pressure calculator (for dimension = 3) at mu = 0
 // (kCut + 1) index is not included in the final summation
-auto iPartialPressure = [](double const &temperature, Hadron const &H, int const &kCut) {
+auto iPartialPressure = [](double const &temperature, Hadron const &H, int const &kCut)
+{
     // determine hadron type (boson / fermion)
     int eta = EtaDetermination(H);
     // determine spin degeneracy
@@ -829,7 +863,8 @@ auto iPartialPressure = [](double const &temperature, Hadron const &H, int const
 
 // partial energy density calculator (for dimension = 3) at mu = 0
 // (kCut + 1) index is not included in the final summation
-auto iPartialEnergyDensity = [](double const &temperature, Hadron const &H, int const &kCut) {
+auto iPartialEnergyDensity = [](double const &temperature, Hadron const &H, int const &kCut)
+{
     // determine hadron type (boson / fermion)
     int eta = EtaDetermination(H);
     // determine spin degeneracy
@@ -855,7 +890,8 @@ auto iPartialEnergyDensity = [](double const &temperature, Hadron const &H, int 
 // ------------------------------------------------------------------------------------------------------------
 
 // partial trace anomaly (interaction measure; for dimension = 3) at mu = 0
-auto iPartialTraceAnomaly = [](double const &partialPressure, double const &partialEnergyDensity) {
+auto iPartialTraceAnomaly = [](double const &partialPressure, double const &partialEnergyDensity)
+{
     // return trace anomaly
     return partialEnergyDensity - 3 * partialPressure;
 };
@@ -864,7 +900,8 @@ auto iPartialTraceAnomaly = [](double const &partialPressure, double const &part
 
 // partial (even) suscebtibility calculator (for dimension = 3) at mu = 0 (pressure and chemical potentials are reduced)
 // (kCut + 1) index is not included in the final summation
-auto iPartialSusceptibility = [](int const &orderB, int const &orderS, int const &orderQ, double const &temperature, Hadron const &H, int const &kCut) {
+auto iPartialSusceptibility = [](int const &orderB, int const &orderS, int const &orderQ, double const &temperature, Hadron const &H, int const &kCut)
+{
     // check if orders are even
     if ((orderB + orderS + orderQ) % 2 > eps)
     {
@@ -903,7 +940,8 @@ auto iPartialSusceptibility = [](int const &orderB, int const &orderS, int const
 // ------------------------------------------------------------------------------------------------------------
 
 // pressure in HRG
-auto PressureHRG = [](std::vector<Hadron> const &hadronList, double const &temperature, int const &kCut) {
+auto PressureHRG = [](std::vector<Hadron> const &hadronList, double const &temperature, int const &kCut)
+{
     // number of hadrons to consider
     int numOfHadrons = static_cast<int>(hadronList.size());
     // calculate pressure
@@ -919,8 +957,28 @@ auto PressureHRG = [](std::vector<Hadron> const &hadronList, double const &tempe
 
 // ------------------------------------------------------------------------------------------------------------
 
+// filtering partial pressure for quantum numbers (only S for now...)
+auto FilteredPressureHRG = [](std::vector<Hadron> const &hadronList, int const &SFilter, double const &temperature, int const &kCut)
+{
+    // number of hadrons to consider
+    int numOfHadrons = static_cast<int>(hadronList.size());
+    // calculate pressure
+    double pressure = 0.;
+    for (int i = 0; i < numOfHadrons; i++)
+    {
+        if (hadronList[i].getS() == SFilter)
+            pressure += iPartialPressure(temperature, hadronList[i], kCut);
+    }
+
+    // return pressure value
+    return pressure;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
 // energy density in HRG
-auto EnergyDensityHRG = [](std::vector<Hadron> const &hadronList, double const &temperature, int const &kCut) {
+auto EnergyDensityHRG = [](std::vector<Hadron> const &hadronList, double const &temperature, int const &kCut)
+{
     // number of hadrons to consider
     int numOfHadrons = static_cast<int>(hadronList.size());
     // calculate energy density
@@ -942,7 +1000,8 @@ auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList,
                             int const &orderS,
                             int const &orderQ,
                             double const &temperature,
-                            int const &kCut) {
+                            int const &kCut)
+{
     // number of hadrons to consider
     int numOfHadrons = static_cast<int>(hadronList.size());
     // calculate given susceptibility
@@ -956,6 +1015,75 @@ auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList,
     return susceptibility;
 };
 
+// ------------------------------------------------------------------------------------------------------------
+
+// partial Petriczky N0 ~ helper function for repulsive mean field HRG calculation
+auto iPartialPetriczkyN0 = [](double const &temperature, Hadron const &H)
+{
+    // determine spin degeneracy
+    int iSpinDeg = H.getSpinDegeneracy();
+    // determine mass
+    double iHadronMass = H.getMass();
+
+    // pre-factor
+    double preFactor = iSpinDeg * temperature * sq(iHadronMass / M_PI) / 2;
+    // argument of Bessel function
+    double argumentBessel = iHadronMass / temperature;
+    // evaluating the Bessel function
+    double Bessel = gsl_sf_bessel_Kn(2, argumentBessel);
+
+    // return partial susceptibility
+    return preFactor * Bessel;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
+//  Petriczky N0 ~ helper function for repulsive mean field HRG calculation
+auto PetriczkyN0 = [](std::vector<Hadron> const &hadronList,
+                      double const &temperature)
+{
+    // number of hadrons to consider
+    int numOfHadrons = static_cast<int>(hadronList.size());
+    // calculate N0
+    double N0 = 0.;
+    for (int i = 0; i < numOfHadrons; i++)
+    {
+        N0 += iPartialPetriczkyN0(temperature, hadronList[i]);
+    }
+
+    // return N0
+    return N0;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
+// susceptibility in repulsive mean field HRG (even B, S = 1... so far)
+auto SusceptibilityRepulsiveMeanFieldHRG = [](std::vector<Hadron> const &hadronList,
+                                              int const &orderB,
+                                              int const &orderS,
+                                              int const &orderQ,
+                                              double const &temperature,
+                                              int const &kCut,
+                                              double const &KPhenom)
+{
+    // calculating ideal HRG susceptibility
+    double susceptibility = SusceptibilityHRG(hadronList, orderB, orderS, orderQ, temperature, kCut);
+
+    // calculating N0
+    double N0 = PetriczkyN0(hadronList, temperature);
+
+    // factors for correction
+    double preFactor = std::pow(2, orderB + 1) / std::pow(temperature, 5) * KPhenom;
+
+    // ideal pressure contributions
+    double p1 = FilteredPressureHRG(hadronList, -1, temperature, kCut);
+    double p2 = FilteredPressureHRG(hadronList, -2, temperature, kCut);
+    double p3 = FilteredPressureHRG(hadronList, -3, temperature, kCut);
+
+    // return susceptibility
+    return susceptibility + preFactor * N0 * (p1 + 2 * p2 + 3 * p3);
+};
+
 //
 //
 // EXTRAPOLATION TO REAL CHEMICAL POTENTIAL VALUES
@@ -963,7 +1091,8 @@ auto SusceptibilityHRG = [](std::vector<Hadron> const &hadronList,
 //
 
 // basis functions for susceptibilities (real chemical potential)
-auto BasisFuncReal = [](int const &B, int const &S, int const &BOrder, int const &SOrder, double const &muB, double const &muS) {
+auto BasisFuncReal = [](int const &B, int const &S, int const &BOrder, int const &SOrder, double const &muB, double const &muS)
+{
     // total number of partial derivations
     int FullOrder = BOrder + SOrder;
     // prefactor
@@ -993,7 +1122,8 @@ auto ZFuncReal = [](double const &muB,
                     int const &BOrder,
                     int const &SOrder,
                     std::vector<std::pair<int, int>> const &SectorNumbers,
-                    Eigen::VectorXd const &SectorCoeffs) {
+                    Eigen::VectorXd const &SectorCoeffs)
+{
     // number of analysed sectors
     int N = static_cast<int>(SectorNumbers.size());
     // container for results

@@ -237,7 +237,7 @@ int main(int argc, char **argv)
     // sectors
     std::vector<std::pair<int, int>> BSNumbers = {{1, 0}, {0, 1}, {1, -1}, {1, 1}, {1, 2}, {1, 3}, {2, 0}, {2, 1}, {2, 2}, {2, 3}, {0, 2}, {0, 3}, {3, 0}, {3, 1}, {3, 2}, {3, 3}};
 
-    // focusing on (B, S) = (2, 0) continuum limes (a0, a1, a2)
+    // write given results to screen
     for (int iParam = 0; iParam < 3; iParam++)
-        std::cout << continuumLimesRes[2](iParam) << " " << continuumLimesJCK[2].row(iParam) << std::endl;
+        std::cout << continuumLimesRes[3](iParam) << " " << continuumLimesJCK[3].row(iParam) << std::endl;
 }
