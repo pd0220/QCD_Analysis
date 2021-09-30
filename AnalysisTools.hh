@@ -939,6 +939,44 @@ auto iPartialSusceptibility = [](int const &orderB, int const &orderS, int const
 
 // ------------------------------------------------------------------------------------------------------------
 
+// contribution calculation for different sector coefficients (for B and S... for now)
+auto SectorContribution = [](int const &orderB, int const &orderS, double const &temperature, Hadron const &H, int const &kCut)
+{
+    // determine hadron type (boson / fermion)
+    int eta = EtaDetermination(H);
+    // determine spin degeneracy
+    int iSpinDeg = H.getSpinDegeneracy();
+    // determine mass
+    double iHadronMass = H.getMass();
+    // determine baryon number
+    int iBaryonNumber = H.getB();
+    // determine strangeness
+    int iStrangeness = -H.getS();
+
+    // pre-factor
+    double preFactor = iSpinDeg * sq(iHadronMass * temperature/ M_PI) / 2;
+
+    // summation of Macdonald function
+    double sumBessel = 0.;
+    for (int k = 1; k <= kCut; k++)
+    {
+        // determine what sector to update
+        int sectorB = k * iBaryonNumber;
+        int sectorS = k * iStrangeness;
+
+        // filtering
+        if (sectorB == orderB && sectorS == orderS)
+        {
+            double argumentBessel = k * iHadronMass / temperature;
+            sumBessel += preFactor * std::pow(-eta, k + 1) / sq(k) * gsl_sf_bessel_Kn(2, argumentBessel);
+        }
+    }
+
+    return sumBessel;
+};
+
+// ------------------------------------------------------------------------------------------------------------
+
 // pressure in HRG
 auto PressureHRG = [](std::vector<Hadron> const &hadronList, double const &temperature, int const &kCut)
 {
@@ -957,8 +995,8 @@ auto PressureHRG = [](std::vector<Hadron> const &hadronList, double const &tempe
 
 // ------------------------------------------------------------------------------------------------------------
 
-// filtering partial pressure for quantum numbers (only S for now...)
-auto FilteredPressureHRG = [](std::vector<Hadron> const &hadronList, int const &SFilter, double const &temperature, int const &kCut)
+// filtering partial pressure for quantum numbers (combined filtering by B and S)
+auto FilteredPressureHRG = [](std::vector<Hadron> const &hadronList, int const &BFilter, int const &SFilter, double const &temperature, int const &kCut)
 {
     // number of hadrons to consider
     int numOfHadrons = static_cast<int>(hadronList.size());
@@ -966,7 +1004,7 @@ auto FilteredPressureHRG = [](std::vector<Hadron> const &hadronList, int const &
     double pressure = 0.;
     for (int i = 0; i < numOfHadrons; i++)
     {
-        if (hadronList[i].getS() == SFilter)
+        if (hadronList[i].getS() == SFilter && hadronList[i].getB() == BFilter)
             pressure += iPartialPressure(temperature, hadronList[i], kCut);
     }
 
@@ -1076,9 +1114,9 @@ auto SusceptibilityRepulsiveMeanFieldHRG = [](std::vector<Hadron> const &hadronL
     double preFactor = std::pow(2, orderB + 1) / std::pow(temperature, 5) * KPhenom;
 
     // ideal pressure contributions
-    double p1 = FilteredPressureHRG(hadronList, -1, temperature, kCut);
-    double p2 = FilteredPressureHRG(hadronList, -2, temperature, kCut);
-    double p3 = FilteredPressureHRG(hadronList, -3, temperature, kCut);
+    double p1 = FilteredPressureHRG(hadronList, 1, -1, temperature, kCut);
+    double p2 = FilteredPressureHRG(hadronList, 1, -2, temperature, kCut);
+    double p3 = FilteredPressureHRG(hadronList, 1, -3, temperature, kCut);
 
     // return susceptibility
     return susceptibility + preFactor * N0 * (p1 + 2 * p2 + 3 * p3);
